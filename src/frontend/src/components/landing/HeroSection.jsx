@@ -15,22 +15,16 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center lg:justify-start px-6 pt-20 overflow-hidden">
-      {/* Immersive R3F Background */}
       <NetworkCanvas />
-
-      {/* Subtle overlay to guarantee text contrast against nodes */}
       <div className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-r from-brand-bg/80 via-brand-bg/40 to-transparent" />
 
-      {/* Foreground Content */}
       <div className="relative z-10 max-w-3xl mx-auto lg:mx-0 lg:ml-[10vw] w-full mt-10 lg:mt-0">
         <div className="p-8 md:p-12 glass-card border border-brand-border/40 rounded-[2rem] shadow-2xl backdrop-blur-md bg-white/60">
 
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-sm font-medium mb-6 opacity-0 animate-fade-in-up delay-0">
             <Sparkles size={16} /> Powered by Gemini 3 Pro
           </div>
 
-          {/* Headline */}
           <h1 className="font-display font-bold tracking-tight leading-[1.1] mb-6">
             <span className="block text-4xl md:text-6xl text-brand-text opacity-0 animate-fade-in-up delay-200">
               Stop Searching.
@@ -43,13 +37,11 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          {/* Subtitle */}
           <p className="text-base md:text-lg text-brand-text/80 max-w-xl mb-8 leading-relaxed opacity-0 animate-fade-in-up delay-600 font-medium tracking-wide">
             Our AI reads your resume, analyzes your profile, and maps you to scholarships
             you're statistically most likely to win — so you never miss an opportunity again.
           </p>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 opacity-0 animate-fade-in-up delay-800">
             <button
               onClick={handleGetStarted}
@@ -62,7 +54,6 @@ export default function HeroSection() {
             </button>
           </div>
 
-          {/* Stats Row */}
           <div className="flex flex-wrap gap-8 opacity-0 animate-fade-in-up delay-1000">
             {[
               { value: '500+', label: 'Scholarships Indexed' },
@@ -77,7 +68,6 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Floating UI Overlay */}
         <div className="absolute -bottom-8 -right-4 md:-right-12 glass-card p-4 animate-scale-in delay-1000 shadow-xl border border-brand-accent/20 bg-white/90">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-brand-success/20 flex items-center justify-center">

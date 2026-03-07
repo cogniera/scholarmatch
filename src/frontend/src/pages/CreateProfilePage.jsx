@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 import { useApp } from '../context/AppContext';
 import ResumeUploader from '../components/profile/ResumeUploader';
 import ManualProfileForm from '../components/profile/ManualProfileForm';
@@ -8,11 +9,20 @@ import { FileText, PenLine, ArrowRight, Zap } from 'lucide-react';
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const { dispatch } = useApp();
+  const { user } = useAuth0();
   const [tab, setTab] = useState('resume');
 
-  const handleManualSubmit = (formData) => {
+  const saveAndNavigate = (formData) => {
     dispatch({ type: 'SET_PROFILE', payload: formData });
+    // Save to localStorage keyed by Auth0 user ID so it persists across sessions
+    if (user?.sub) {
+      localStorage.setItem(`profile_${user.sub}`, JSON.stringify(formData));
+    }
     navigate('/dashboard/home');
+  };
+
+  const handleManualSubmit = (formData) => {
+    saveAndNavigate(formData);
   };
 
   const handleDemoProfile = () => {
@@ -28,15 +38,12 @@ export default function CreateProfilePage() {
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center px-6 py-20">
       <div className="w-full max-w-3xl">
-        {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-display font-bold text-brand-text mb-3">Build Your Profile</h1>
           <p className="text-brand-muted text-lg">Choose how our AI engine should learn about you.</p>
         </div>
 
-        {/* Card */}
         <div className="glass-card p-1">
-          {/* Tab Switcher */}
           <div className="flex p-1 bg-brand-bg/50 rounded-lg mb-6">
             <button
               onClick={() => setTab('resume')}
@@ -54,7 +61,6 @@ export default function CreateProfilePage() {
             </button>
           </div>
 
-          {/* Content */}
           <div className="p-6 md:p-8">
             {tab === 'resume' ? (
               <div className="animate-fade-in">
@@ -73,7 +79,6 @@ export default function CreateProfilePage() {
           </div>
         </div>
 
-        {/* Quick demo entry */}
         <div className="text-center mt-6">
           <button onClick={handleDemoProfile}
             className="text-sm text-brand-muted hover:text-brand-accent transition-colors inline-flex items-center gap-1.5">
