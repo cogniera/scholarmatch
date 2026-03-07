@@ -3,8 +3,8 @@ routers/scholarships.py — Scholarship browsing + matching endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.auth import get_user_id
-from app.database import get_supabase
+from backend.app.core.auth import get_user_id
+from backend.app.database.database import get_supabase
 from app.services.matching import match_scholarships
 from app.services.gemini import explain_match, readiness_score
 from typing import List, Optional
