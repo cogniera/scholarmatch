@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useApp } from './context/AppContext';
 import LandingPage from './pages/LandingPage';
 import CreateProfilePage from './pages/CreateProfilePage';
+import FirstTimePage from './pages/FirstTimePage';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import ScholarshipsPage from './pages/dashboard/ScholarshipsPage';
@@ -20,6 +21,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/create-profile" element={<CreateProfilePage />} />
+      <Route path="/first-time" element={<ProtectedRoute><FirstTimePage /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<DashboardHome />} />
