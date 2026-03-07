@@ -4,13 +4,15 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useApp } from '../context/AppContext';
 import ResumeUploader from '../components/profile/ResumeUploader';
 import ManualProfileForm from '../components/profile/ManualProfileForm';
-import { FileText, PenLine, ArrowRight, Zap } from 'lucide-react';
+import { FileText, PenLine, ArrowRight, Zap, CheckCircle, XCircle, Loader } from 'lucide-react';
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const { dispatch } = useApp();
   const { user } = useAuth0();
   const [tab, setTab] = useState('resume');
+  const [connectionStatus, setConnectionStatus] = useState(null); // null, loading, success, error
+  const [connectionMessage, setConnectionMessage] = useState('');
 
   const saveAndNavigate = (formData) => {
     dispatch({ type: 'SET_PROFILE', payload: formData });
@@ -18,7 +20,7 @@ export default function CreateProfilePage() {
     if (user?.sub) {
       localStorage.setItem(`profile_${user.sub}`, JSON.stringify(formData));
     }
-    navigate('/dashboard/home');
+    navigate('/first-time');
   };
 
   const handleManualSubmit = (formData) => {
@@ -27,12 +29,38 @@ export default function CreateProfilePage() {
 
   const handleDemoProfile = () => {
     dispatch({ type: 'SET_DEMO_PROFILE' });
-    navigate('/dashboard/home');
+    navigate('/first-time');
   };
 
   const handleResumeComplete = () => {
     dispatch({ type: 'SET_DEMO_PROFILE' });
-    navigate('/dashboard/home');
+    navigate('/first-time');
+  };
+
+  const testConnection = async () => {
+    setConnectionStatus('loading');
+    setConnectionMessage('Testing connection...');
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setConnectionStatus('success');
+        setConnectionMessage(`✓ Connected! Backend responded: ${JSON.stringify(data)}`);
+      } else {
+        setConnectionStatus('error');
+        setConnectionMessage(`✗ Backend returned status ${response.status}`);
+      }
+    } catch (error) {
+      setConnectionStatus('error');
+      setConnectionMessage(`✗ Connection failed: ${error.message}`);
+    }
   };
 
   return (
@@ -84,6 +112,39 @@ export default function CreateProfilePage() {
             className="text-sm text-brand-muted hover:text-brand-accent transition-colors inline-flex items-center gap-1.5">
             <Zap size={14} /> Use demo profile (Alex Student) for quick exploration
           </button>
+
+          {/* Connection Test Section */}
+          <div className="mt-6 pt-6 border-t border-brand-border">
+            <button
+              onClick={testConnection}
+              disabled={connectionStatus === 'loading'}
+              className="text-sm text-brand-muted hover:text-brand-accent transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
+            >
+              {connectionStatus === 'loading' ? (
+                <>
+                  <Loader size={14} className="animate-spin" /> Testing backend connection...
+                </>
+              ) : (
+                <>
+                  <Zap size={14} /> Test API Connection
+                </>
+              )}
+            </button>
+
+            {connectionStatus === 'success' && (
+              <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-2">
+                <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-green-700 dark:text-green-400">{connectionMessage}</p>
+              </div>
+            )}
+
+            {connectionStatus === 'error' && (
+              <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-700 dark:text-red-400">{connectionMessage}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
