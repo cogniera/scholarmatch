@@ -3,9 +3,9 @@ routers/uploads.py — Cloudinary upload URL saving + AI chatbot
 """
 
 from fastapi import APIRouter, Depends, HTTPException
-from backend.app.core.auth import get_user_id
-from backend.app.database.database import get_supabase
-from backend.app.models.models import UploadURLSave, ChatRequest
+from app.core.auth import get_user_id
+from app.database.database import get_supabase
+from app.models.models import UploadURLSave, ChatRequest
 from app.services.gemini import application_chat
 
 router = APIRouter(tags=["Uploads & Chat"])
