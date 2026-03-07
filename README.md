@@ -1,2 +1,2 @@
 # scholarmatch
-A system for making scholarship application easier
+Helps ease the burden for students.
