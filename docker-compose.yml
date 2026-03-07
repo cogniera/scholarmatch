@@ -1,17 +1,17 @@
-version : "3.9"
+version: "3.9"
 
-services : 
-  backend: 
+services:
+  backend:
     build: ./backend
     container_name: scholarmatch-backend
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env 
+      - ./backend/.env
     volumes:
       - ./backend:/app
     restart: unless-stopped
-  
+
   frontend:
     build: ./frontend
     container_name: scholarmatch-frontend
@@ -23,5 +23,5 @@ services :
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      -backend
-    restart: unless_stopped 
+      - backend
+    restart: unless-stopped

@@ -16,10 +16,10 @@ export default function HeroSection() {
       {/* Foreground Content */}
       <div className="relative z-10 max-w-3xl mx-auto lg:mx-0 lg:ml-[10vw] w-full mt-10 lg:mt-0">
         <div className="p-8 md:p-12 glass-card border border-brand-border/40 rounded-[2rem] shadow-2xl backdrop-blur-md bg-white/60">
-          
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/20 text-brand-accent text-sm font-medium mb-6 opacity-0 animate-fade-in-up delay-0">
-            <Sparkles size={16} /> Powered by Cloudinary AI
+            <Sparkles size={16} /> Powered by Gemini 3 Pro
           </div>
 
           {/* Headline */}
@@ -68,15 +68,15 @@ export default function HeroSection() {
 
         {/* Floating UI Overlay attached to the hero container */}
         <div className="absolute -bottom-8 -right-4 md:-right-12 glass-card p-4 animate-scale-in delay-1000 shadow-xl border border-brand-accent/20 bg-white/90">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-success/20 flex items-center justify-center">
-                <Sparkles className="text-brand-success" size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-brand-text">95% Match Found</p>
-                <p className="text-xs text-brand-muted">Google Generation Scholarship</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-brand-success/20 flex items-center justify-center">
+              <Sparkles className="text-brand-success" size={20} />
             </div>
+            <div>
+              <p className="text-sm font-bold text-brand-text">95% Match Found</p>
+              <p className="text-xs text-brand-muted">Google Generation Scholarship</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

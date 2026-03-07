@@ -13,40 +13,46 @@ export default function ScholarshipCard({ scholarship, onViewDetails }) {
 
   return (
     <div onClick={() => onViewDetails(scholarship)}
-      className="glass-card-hover p-6 cursor-pointer relative group flex flex-col pt-12">
-      
-      {/* Absolute Header row: Bookmark (Left), Match Badge (Right) */}
-      <button onClick={toggleSave}
-        className={'absolute top-4 left-4 p-2 rounded-md transition-colors ' + (isSaved ? 'text-brand-accent bg-brand-accent/10' : 'text-brand-muted hover:text-brand-accent hover:bg-brand-bg')}>
-        <Bookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
-      </button>
+      className="glass-card-hover p-6 cursor-pointer relative group flex flex-col h-full">
 
-      <div className="absolute top-4 right-4">
-        <MatchScoreBadge score={scholarship.matchScore} />
-      </div>
+      {/* Top Section Container: ensures title/source don't affect bottom alignment */}
+      <div className="flex-1 flex flex-col">
+        {/* Header row: Bookmark (Left), Match Badge (Right) */}
+        <div className="flex justify-between items-start mb-2 mt-[-0.5rem] mx-[-0.5rem]">
+          <button onClick={toggleSave}
+            className={'p-2 rounded-md transition-colors ' + (isSaved ? 'text-brand-accent bg-brand-accent/10' : 'text-brand-muted hover:text-brand-accent hover:bg-brand-bg')}>
+            <Bookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
+          </button>
 
-      {/* Card Body */}
-      <div className="flex items-center gap-4 mb-4">
-        <img src={scholarship.logoUrl} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
-        <div>
-          <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name}</h3>
-          <p className="text-sm text-brand-muted">{scholarship.organization}</p>
+          <div>
+            <MatchScoreBadge score={scholarship.matchScore} />
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="flex items-start gap-4 mb-4">
+          <img src={scholarship.logoUrl} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
+          <div className="flex-1 min-w-0 pr-4">
+            <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name}</h3>
+            <p className="text-sm text-brand-muted">{scholarship.organization}</p>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-auto pt-4 border-t border-brand-border/50">
+      {/* Bottom Section: Categories & Footer strictly aligned */}
+      <div className="flex gap-2 mb-5 flex-wrap">
+        {scholarship.tags.slice(0, 3).map(tag => (
+          <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-brand-bg border border-brand-border text-brand-muted font-medium">{tag}</span>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between pt-4 border-t border-brand-border/50">
         <span className="text-xl font-display font-bold text-brand-accent">
           ${scholarship.amount.toLocaleString()}
         </span>
         <span className="text-sm font-medium text-brand-muted bg-brand-bg px-3 py-1 rounded-md">
           Due: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
         </span>
-      </div>
-
-      <div className="flex gap-2 mt-4 flex-wrap">
-        {scholarship.tags.slice(0, 3).map(tag => (
-          <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-brand-bg border border-brand-border text-brand-muted font-medium">{tag}</span>
-        ))}
       </div>
     </div>
   );

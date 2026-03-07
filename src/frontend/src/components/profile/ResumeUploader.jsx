@@ -109,7 +109,7 @@ export default function ResumeUploader() {
         </div>
         <span className="text-xs text-brand-muted/60">PDF, DOC, DOCX • Max 10MB</span>
       </button>
-      <p className="text-xs text-brand-muted/50 mt-4">Securely processed via Cloudinary</p>
+      {/* <p className="text-xs text-brand-muted/50 mt-4">Securely processed via Cloudinary</p> */}
     </div>
   );
 }
