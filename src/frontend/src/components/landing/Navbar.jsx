@@ -22,15 +22,15 @@ export default function Navbar() {
           <div className="w-9 h-9 rounded-lg bg-brand-accent flex items-center justify-center">
             <GraduationCap size={20} className="text-brand-bg" />
           </div>
-          <span className="text-xl font-display font-bold tracking-tight text-white">
+          <span className="text-xl font-display font-bold tracking-tight text-brand-text">
             Scholar<span className="text-brand-accent">AI</span>
           </span>
         </div>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          <a href="#about" className="text-sm font-medium text-brand-muted hover:text-white transition-colors">About Us</a>
-          <a href="#contact" className="text-sm font-medium text-brand-muted hover:text-white transition-colors">Contact Us</a>
+          <a href="#about" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">About Us</a>
+          <a href="#contact" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">Contact Us</a>
           <button onClick={() => navigate('/create-profile')} className="btn-primary text-sm">
             Get Started
           </button>
@@ -45,8 +45,8 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden bg-brand-surface/95 backdrop-blur-xl border-t border-brand-border px-6 py-6 space-y-4 animate-fade-in">
-          <a href="#about" className="block text-brand-muted hover:text-white transition-colors">About Us</a>
-          <a href="#contact" className="block text-brand-muted hover:text-white transition-colors">Contact Us</a>
+          <a href="#about" className="block text-brand-muted hover:text-brand-text transition-colors">About Us</a>
+          <a href="#contact" className="block text-brand-muted hover:text-brand-text transition-colors">Contact Us</a>
           <button onClick={() => { navigate('/create-profile'); setMobileOpen(false); }} className="btn-primary w-full justify-center text-sm">
             Get Started
           </button>

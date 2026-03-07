@@ -27,7 +27,7 @@ export default function ScholarshipsPage() {
   return (
     <div className="animate-fade-in max-w-6xl space-y-6">
       <div>
-        <h1 className="text-3xl font-display font-bold text-white">Scholarships</h1>
+        <h1 className="text-3xl font-display font-bold text-brand-text">Scholarships</h1>
         <p className="text-brand-muted mt-1">AI-curated matches based on your profile.</p>
       </div>
 

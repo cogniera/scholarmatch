@@ -30,6 +30,10 @@ def process_webpages(pages: List[dict]):
         - amount: String (The dollar amount mentioned. If it varies or is not stated, put "Varies" or "Not specified")
         - description: String (A 2-3 sentence summary)
         - eligibility_keywords: Array of Strings (Things like "leadership", "indigenous", "entrance")
+        - deadline: String (The application due date. Format as YYYY-MM-DD if possible, otherwise "Not specified")
+        - application_url: String (The exact link or email to apply. If not found in text, fallback to the URL Source provided below)
+        - education_level: Array of Strings (e.g., ["High School", "Undergraduate", "Masters", "PhD"])
+        - is_renewable: Boolean (true if it mentions it can be renewed for subsequent years, false otherwise)
         
         URL Source: {url}
         

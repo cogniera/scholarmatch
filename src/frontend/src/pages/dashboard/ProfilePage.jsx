@@ -18,14 +18,14 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-in max-w-5xl space-y-8">
-      <h1 className="text-3xl font-display font-bold text-white">Profile</h1>
+      <h1 className="text-3xl font-display font-bold text-brand-text">Profile</h1>
 
       {/* Two Column */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column — Photo + Identity */}
         <div className="glass-card p-6 flex flex-col items-center text-center">
           <ProfileAvatar publicId={state.profileImagePublicId} size={120} className="mb-4" />
-          <h2 className="text-xl font-display font-bold text-white">{profile.name || 'Student'}</h2>
+          <h2 className="text-xl font-display font-bold text-brand-text">{profile.name || 'Student'}</h2>
           <p className="text-sm text-brand-muted">{profile.program}</p>
           <p className="text-xs text-brand-muted">{profile.university}</p>
           <div className="w-full mt-6 pt-6 border-t border-brand-border">
@@ -41,7 +41,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Info Grid */}
           <div className="glass-card p-6">
-            <h3 className="font-display font-semibold text-white mb-4">Academic Details</h3>
+            <h3 className="font-display font-semibold text-brand-text mb-4">Academic Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {[
                 { icon: Award, label: 'GPA', value: profile.gpa?.toFixed(1) || 'N/A' },
@@ -53,7 +53,7 @@ export default function ProfilePage() {
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3">
                   <div className="p-2 bg-brand-surface rounded-lg"><item.icon size={16} className="text-brand-muted" /></div>
-                  <div><p className="text-xs text-brand-muted">{item.label}</p><p className="text-sm font-medium text-white">{item.value}</p></div>
+                  <div><p className="text-xs text-brand-muted">{item.label}</p><p className="text-sm font-medium text-brand-text">{item.value}</p></div>
                 </div>
               ))}
             </div>
@@ -61,7 +61,7 @@ export default function ProfilePage() {
 
           {/* Resume */}
           <div className="glass-card p-6">
-            <h3 className="font-display font-semibold text-white mb-4 flex items-center gap-2">
+            <h3 className="font-display font-semibold text-brand-text mb-4 flex items-center gap-2">
               <UploadCloud size={18} className="text-brand-accent" /> Resume
             </h3>
             <ResumeUploader />
@@ -69,7 +69,7 @@ export default function ProfilePage() {
 
           {/* Suggestions */}
           <div className="glass-card p-6">
-            <h3 className="font-display font-semibold text-white mb-4">Improve Your Profile</h3>
+            <h3 className="font-display font-semibold text-brand-text mb-4">Improve Your Profile</h3>
             <ul className="space-y-2">
               {suggestions.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-brand-muted">

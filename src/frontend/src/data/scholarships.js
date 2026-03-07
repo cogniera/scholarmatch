@@ -4,6 +4,7 @@ export const scholarships = [
     amount: 10000, currency: 'USD', deadline: '2025-03-15',
     logoUrl: 'https://res.cloudinary.com/demo/image/upload/c_thumb,w_80,h_80,g_face,r_max/docs/models.jpg',
     bannerUrl: 'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_450,g_auto,f_auto,q_auto/cld-sample-4',
+    videoUrl: 'elephants',
     matchScore: 92, tags: ['STEM', 'Computer Science', 'Undergraduate'],
     eligibility: { minGpa: 3.5, programs: ['Computer Science', 'Engineering'], year: ['3rd Year', '4th Year'], location: null },
     aiAnalysis: { whyYouQualify: ['Computer Science program matches', 'Strong academic record'], requirementsMet: ['Program requirement', 'Academic year', 'Citizenship'], requirementsMissing: ['GPA must be 3.5 (yours: 3.2)'], improvementTip: 'Raise your GPA by 0.3 to fully qualify.' },

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.routers import profile, scholarships, uploads
+from app.api.routes import profile, scholarships, uploads
 
 app = FastAPI(
     title="ScholarMatch API",

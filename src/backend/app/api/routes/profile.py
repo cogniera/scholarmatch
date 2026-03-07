@@ -3,9 +3,9 @@ routers/profile.py — Student profile endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from backend.app.core.auth import verify_token, get_user_id
-from backend.app.database.database import get_supabase
-from backend.app.models.models import ProfileCreate, ProfileUpdate, ProfileResponse
+from app.core.auth import verify_token, get_user_id
+from app.database.database import get_supabase
+from app.models.models import ProfileCreate, ProfileUpdate, ProfileResponse
 
 router = APIRouter(prefix="/profile", tags=["Profile"])
 
