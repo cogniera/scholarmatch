@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    @apply bg-brand-bg text-brand-text font-body antialiased;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-brand-accent hover:bg-brand-accentHover text-brand-bg font-semibold rounded-lg
+           transition-all duration-200 inline-flex items-center gap-2 cursor-pointer
+           shadow-[0_0_20px_rgba(245,166,35,0.15)] hover:shadow-[0_0_30px_rgba(245,166,35,0.25)];
+  }
+  .btn-ghost {
+    @apply px-6 py-3 bg-transparent border border-brand-border text-brand-text font-medium rounded-lg
+           hover:border-brand-accent hover:text-brand-accent transition-all duration-200 cursor-pointer
+           inline-flex items-center gap-2;
+  }
+  .glass-card {
+    @apply bg-brand-surface/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-lg;
+  }
+  .glass-card-hover {
+    @apply glass-card hover:-translate-y-1 hover:shadow-xl hover:border-brand-accent/30 transition-all duration-300;
+  }
+  .input-field {
+    @apply w-full bg-brand-bg border border-brand-border rounded-lg py-2.5 px-4 text-brand-text
+           placeholder-brand-muted focus:outline-none focus:border-brand-accent focus:ring-1
+           focus:ring-brand-accent/30 transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  /* Staggered animation delays for landing page */
+  .delay-0 { animation-delay: 0ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-600 { animation-delay: 600ms; }
+  .delay-800 { animation-delay: 800ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #080C14; }
+::-webkit-scrollbar-thumb { background: #1E2D4A; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3f66; }
