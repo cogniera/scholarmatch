@@ -16,6 +16,8 @@ class ScrapedPage(BaseModel):
     url: str
     text: str
 
+import time
+
 @app.post("/process-webpages")
 async def process_webpages(pages: List[ScrapedPage]):
     all_scholarships = []
@@ -24,6 +26,7 @@ async def process_webpages(pages: List[ScrapedPage]):
     print(f"Received {len(pages)} pages for processing.")
     
     for page in pages:
+        time.sleep(4)  # Wait 4 seconds to avoid hitting Gemini Free Tier 15 RPM limit
         print(f"Extracting scholarships from: {page.url}")
         prompt = f"""
         You are an expert data extraction algorithm. Find all the scholarships/bursaries mentioned in the text and extract their details into a strict JSON array format.
@@ -31,7 +34,7 @@ async def process_webpages(pages: List[ScrapedPage]):
         For each scholarship, extract:
         - name: String (The title of the scholarship)
         - organization: String (The entity offering it)
-        - amount: String (The dollar amount mentioned. If it varies or is not stated, put "Varies" or "Not specified" instead of 0)
+        - amount: String (The dollar amount mentioned. If it varies or is not stated, put "Varies" or "Not specified")
         - description: String (A 2-3 sentence summary)
         - eligibility_keywords: Array of Strings (Things like "leadership", "indigenous", "entrance")
         
