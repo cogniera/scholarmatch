@@ -23,7 +23,7 @@ export default function Navbar() {
             <GraduationCap size={20} className="text-brand-bg" />
           </div>
           <span className="text-xl font-display font-bold tracking-tight text-brand-text">
-            Scholar<span className="text-brand-accent">AI</span>
+            Scholar<span className="text-brand-accent">Match</span>
           </span>
         </div>
 
