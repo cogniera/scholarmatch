@@ -22,7 +22,7 @@ export default function Sidebar() {
         <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
           <GraduationCap size={16} className="text-brand-bg" />
         </div>
-        <span className="text-lg font-display font-bold text-white tracking-tight">
+        <span className="text-lg font-display font-bold text-brand-text tracking-tight">
           Scholar<span className="text-brand-accent">AI</span>
         </span>
       </div>
@@ -37,7 +37,7 @@ export default function Sidebar() {
               'flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium ' +
               (isActive
                 ? 'bg-brand-accent/10 text-brand-accent border-r-2 border-brand-accent'
-                : 'text-brand-muted hover:bg-brand-bg hover:text-white')
+                : 'text-brand-muted hover:bg-brand-bg hover:text-brand-text')
             }
           >
             <item.icon size={18} /> {item.name}
@@ -51,7 +51,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3 px-2">
             <ProfileAvatar publicId={state.profileImagePublicId} size={36} />
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{profile.name}</p>
+              <p className="text-sm font-medium text-brand-text truncate">{profile.name}</p>
               <p className="text-xs text-brand-muted truncate">{profile.program}</p>
             </div>
           </div>

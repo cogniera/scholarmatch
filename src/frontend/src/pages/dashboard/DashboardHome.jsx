@@ -20,7 +20,7 @@ export default function DashboardHome() {
     <div className="animate-fade-in space-y-8 max-w-6xl">
       {/* Welcome */}
       <div>
-        <h1 className="text-3xl font-display font-bold text-white">
+        <h1 className="text-3xl font-display font-bold text-brand-text">
           Welcome back, <span className="text-brand-accent">{state.profile?.name || 'Scholar'}</span>
         </h1>
         <p className="text-brand-muted mt-1">Here's your scholarship landscape today.</p>
@@ -37,7 +37,7 @@ export default function DashboardHome() {
       {/* Recommended */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-display font-semibold text-white">Top AI Matches</h2>
+          <h2 className="text-xl font-display font-semibold text-brand-text">Top AI Matches</h2>
           <button onClick={() => navigate('/dashboard/scholarships')} className="text-sm text-brand-accent hover:text-brand-accentHover flex items-center gap-1 transition-colors">
             See All <ArrowRight size={14} />
           </button>
@@ -49,14 +49,14 @@ export default function DashboardHome() {
 
       {/* Upcoming Deadlines */}
       <div className="glass-card p-6">
-        <h2 className="text-lg font-display font-semibold text-white mb-4">Upcoming Deadlines</h2>
+        <h2 className="text-lg font-display font-semibold text-brand-text mb-4">Upcoming Deadlines</h2>
         <div className="space-y-3">
           {upcomingDeadlines.map(s => {
             const daysLeft = Math.max(0, Math.ceil((new Date(s.deadline) - new Date()) / (1000 * 60 * 60 * 24)));
             return (
               <div key={s.id} className="flex items-center justify-between py-2 border-b border-brand-border/30 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-white">{s.name}</p>
+                  <p className="text-sm font-medium text-brand-text">{s.name}</p>
                   <p className="text-xs text-brand-muted">${s.amount.toLocaleString()} • {s.organization}</p>
                 </div>
                 <span className={'text-xs font-semibold px-2.5 py-1 rounded-full ' + (daysLeft < 30 ? 'bg-brand-danger/10 text-brand-danger' : 'bg-brand-warning/10 text-brand-warning')}>
@@ -70,19 +70,19 @@ export default function DashboardHome() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-lg font-display font-semibold text-white mb-4">Quick Actions</h2>
+        <h2 className="text-lg font-display font-semibold text-brand-text mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button onClick={() => navigate('/dashboard/profile')} className="glass-card-hover p-5 flex items-center gap-3 text-left">
             <div className="w-10 h-10 text-brand-accent bg-brand-accent/10 rounded-lg flex items-center justify-center"><UploadCloud size={20} /></div>
-            <div><p className="text-sm font-medium text-white">Upload Document</p><p className="text-xs text-brand-muted">Resume, transcript, or letter</p></div>
+            <div><p className="text-sm font-medium text-brand-text">Upload Document</p><p className="text-xs text-brand-muted">Resume, transcript, or letter</p></div>
           </button>
           <button onClick={() => navigate('/dashboard/scholarships')} className="glass-card-hover p-5 flex items-center gap-3 text-left">
             <div className="w-10 h-10 text-brand-accent bg-brand-accent/10 rounded-lg flex items-center justify-center"><Search size={20} /></div>
-            <div><p className="text-sm font-medium text-white">Browse Scholarships</p><p className="text-xs text-brand-muted">Explore AI recommendations</p></div>
+            <div><p className="text-sm font-medium text-brand-text">Browse Scholarships</p><p className="text-xs text-brand-muted">Explore AI recommendations</p></div>
           </button>
           <button onClick={() => navigate('/dashboard/roadmap')} className="glass-card-hover p-5 flex items-center gap-3 text-left">
             <div className="w-10 h-10 text-brand-accent bg-brand-accent/10 rounded-lg flex items-center justify-center"><Map size={20} /></div>
-            <div><p className="text-sm font-medium text-white">View Roadmap</p><p className="text-xs text-brand-muted">Gap analysis & next steps</p></div>
+            <div><p className="text-sm font-medium text-brand-text">View Roadmap</p><p className="text-xs text-brand-muted">Gap analysis & next steps</p></div>
           </button>
         </div>
       </div>
