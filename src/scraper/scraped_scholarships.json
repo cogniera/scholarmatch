@@ -1,1 +1,109 @@
-[]
+[
+    {
+        "name": "Horatio Alger Canadian Scholarship",
+        "organization": "Horatio Alger Association",
+        "amount": "$25,000",
+        "description": "Undergraduate scholarships awarded to full-time grade 11 high school students who have demonstrated integrity and perseverance in overcoming adversity, a commitment to pursue a post-secondary education, a desire to contribute to society, and a good academic record.",
+        "eligibility_keywords": [
+            "financial need",
+            "grade 11",
+            "adversity",
+            "undergraduate"
+        ]
+    },
+    {
+        "name": "Vocational & Technical Scholarship",
+        "organization": "Horatio Alger Association",
+        "amount": "$9,000",
+        "description": "For students pursuing a certificate or diploma, helping them achieve their career aspirations and fulfill their potential.",
+        "eligibility_keywords": [
+            "vocational",
+            "technical",
+            "certificate",
+            "diploma"
+        ]
+    },
+    {
+        "name": "RBC Ignite Scholarship",
+        "organization": "RBC Royal Bank",
+        "amount": "$1,500",
+        "description": "Scholarships to help youth access new skills and training for job-ready certifications, skills-building courses, and hands-on training.",
+        "eligibility_keywords": [
+            "youth",
+            "certifications",
+            "skills-building",
+            "ages 16-20"
+        ]
+    },
+    {
+        "name": "RBC Elevate Scholarship",
+        "organization": "RBC Royal Bank",
+        "amount": "$15,000",
+        "description": "Scholarships to help individuals between 17-29 attend post-secondary education programs in Canada for at least two years.",
+        "eligibility_keywords": [
+            "post-secondary",
+            "undergraduate",
+            "ages 17-29",
+            "financial need"
+        ]
+    },
+    {
+        "name": "RBC Reimagine Scholarship",
+        "organization": "RBC Royal Bank",
+        "amount": "$5,000",
+        "description": "Scholarships for adult learners aged 25 or older seeking upskilling or reskilling opportunities to grow in their current career or transition into a new field.",
+        "eligibility_keywords": [
+            "adult learner",
+            "upskilling",
+            "reskilling",
+            "ages 25+"
+        ]
+    },
+    {
+        "name": "Building Brighter Futures: Bursaries and Scholarships",
+        "organization": "Indspire",
+        "amount": "Varies",
+        "description": "Financial support for First Nations, Inuit, and Métis students for full and part-time studies in college, university, skilled trades, apprenticeships, and technology programs.",
+        "eligibility_keywords": [
+            "indigenous",
+            "First Nations",
+            "Inuit",
+            "Métis",
+            "post-secondary"
+        ]
+    },
+    {
+        "name": "President's Admission Scholarship",
+        "organization": "University of Calgary",
+        "amount": "Varies",
+        "description": "High School Prestige Awards for high achieving entering students. The criteria for these awards vary but always include academic excellence and accomplishments outside the classroom.",
+        "eligibility_keywords": [
+            "entrance",
+            "academic excellence",
+            "leadership",
+            "extracurricular"
+        ]
+    },
+    {
+        "name": "Entrance Bursary",
+        "organization": "Concordia University",
+        "amount": "Varies",
+        "description": "Designed to provide financial support to newly admitted students to an Undergraduate Bachelor's degree program in any discipline of study.",
+        "eligibility_keywords": [
+            "entrance",
+            "financial need",
+            "undergraduate"
+        ]
+    },
+    {
+        "name": "In-Course Bursary",
+        "organization": "Concordia University",
+        "amount": "Varies",
+        "description": "Concordia offers need-based In-Course Bursaries to returning Bachelor's students in the Fall semester.",
+        "eligibility_keywords": [
+            "returning student",
+            "undergraduate",
+            "financial need"
+        ]
+    }
+]
