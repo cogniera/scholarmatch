@@ -12,7 +12,7 @@
 
 ## 🧠 About
 
-Scholarmatch aims to simplify the scholarship application process by aggregating opportunities and providing an intuitive interface for users to browse and apply. Whether you’re a student looking for financial aid or a mentor helping students succeed, Scholarmatch provides tools to make scholarship discovery effortless.
+Scholarmatch aims to simplify the scholarship application process by aggregating opportunities tailored to each student and matching them with opportunities that actually fit. Whether you’re a student looking for financial aid or a mentor helping students succeed, Scholarmatch provides tools to make scholarship discovery effortless.
 
 ---
 
