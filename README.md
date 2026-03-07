@@ -7,7 +7,7 @@
 - [@cogniera](https://github.com/cogniera)
 - [@vkreji](https://www.github.com/vkreji)
 - [@Aad1t](https://github.com/Aad1t)
-- [@JosiahLam](https://github.com/JosiahLam$0)
+- [@JosiahLam](https://github.com/JosiahLam)
 
 
 ## 🧠 About
