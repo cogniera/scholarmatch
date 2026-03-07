@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Menu, X } from 'lucide-react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function Navbar() {
-  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -13,12 +13,21 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      window.location.href = '/create-profile';
+    } else {
+      loginWithRedirect();
+    }
+    setMobileOpen(false);
+  };
+
   return (
     <nav className={'fixed w-full z-50 top-0 transition-all duration-300 ' +
       (scrolled ? 'bg-brand-bg/80 backdrop-blur-lg border-b border-brand-border' : 'bg-transparent')}>
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.location.href = '/'}>
           <div className="w-9 h-9 rounded-lg bg-brand-accent flex items-center justify-center">
             <GraduationCap size={20} className="text-brand-bg" />
           </div>
@@ -31,9 +40,18 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           <a href="#about" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">About Us</a>
           <a href="#contact" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">Contact Us</a>
-          <button onClick={() => navigate('/create-profile')} className="btn-primary text-sm">
-            Get Started
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={() => logout(  { logoutParams: { returnTo: window.location.origin } })}
+              className="btn-ghost text-sm"
+            >
+              Log Out
+            </button>
+          ) : (
+            <button onClick={handleGetStarted} className="btn-primary text-sm">
+              Get Started
+            </button>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -47,7 +65,7 @@ export default function Navbar() {
         <div className="md:hidden bg-brand-surface/95 backdrop-blur-xl border-t border-brand-border px-6 py-6 space-y-4 animate-fade-in">
           <a href="#about" className="block text-brand-muted hover:text-brand-text transition-colors">About Us</a>
           <a href="#contact" className="block text-brand-muted hover:text-brand-text transition-colors">Contact Us</a>
-          <button onClick={() => { navigate('/create-profile'); setMobileOpen(false); }} className="btn-primary w-full justify-center text-sm">
+          <button onClick={handleGetStarted} className="btn-primary w-full justify-center text-sm">
             Get Started
           </button>
         </div>

@@ -1,4 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import { appReducer, initialState } from './appReducer';
 import { fetchProfile } from '../services/api';
 
@@ -6,25 +8,27 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const navigate = useNavigate();
 
-  /**
-   * When a user logs in (authToken appears in state), fetch their full
-   * profile from the backend. This rehydrates resumeUrl, transcriptUrl,
-   * and all profile fields so they persist across page refreshes.
-   */
   useEffect(() => {
-    if (!state.authToken) return;
+    if (!isAuthenticated) return;
 
-    fetchProfile(state.authToken)
-      .then((profile) => {
-        if (profile) {
-          dispatch({ type: 'SET_PROFILE_FROM_BACKEND', payload: profile });
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to fetch profile from backend:', err);
-      });
-  }, [state.authToken]);
+    getAccessTokenSilently().then(async (token) => {
+      dispatch({ type: 'SET_AUTH_TOKEN', payload: token });
+
+      const profile = await fetchProfile(token);
+
+      if (profile) {
+        // Returning user — load profile and go straight to dashboard
+        dispatch({ type: 'SET_PROFILE_FROM_BACKEND', payload: profile });
+        navigate('/dashboard/home');
+      } else {
+        // New user — send to create profile
+        navigate('/create-profile');
+      }
+    }).catch(console.error);
+  }, [isAuthenticated]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

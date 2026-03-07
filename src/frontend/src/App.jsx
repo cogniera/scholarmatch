@@ -11,27 +11,25 @@ import ProfilePage from './pages/dashboard/ProfilePage';
 
 function ProtectedRoute({ children }) {
   const { state } = useApp();
-  if (!state.isAuthenticated) return <Navigate to="/create-profile" replace />;
+  if (!state.isAuthenticated) return <Navigate to="/" replace />;
   return children;
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/create-profile" element={<CreateProfilePage />} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route index element={<Navigate to="home" replace />} />
-          <Route path="home" element={<DashboardHome />} />
-          <Route path="scholarships" element={<ScholarshipsPage />} />
-          <Route path="roadmap" element={<RoadmapPage />} />
-          <Route path="applications" element={<ApplicationsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/create-profile" element={<CreateProfilePage />} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<DashboardHome />} />
+        <Route path="scholarships" element={<ScholarshipsPage />} />
+        <Route path="roadmap" element={<RoadmapPage />} />
+        <Route path="applications" element={<ApplicationsPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
