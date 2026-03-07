@@ -23,7 +23,7 @@ export default function Sidebar() {
           <GraduationCap size={16} className="text-brand-bg" />
         </div>
         <span className="text-lg font-display font-bold text-brand-text tracking-tight">
-          Scholar<span className="text-brand-accent">AI</span>
+          Scholar<span className="text-brand-accent">Match</span>
         </span>
       </div>
 
@@ -45,18 +45,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom profile card */}
-      {profile && (
-        <div className="p-4 border-t border-brand-border">
-          <div className="flex items-center gap-3 px-2">
-            <ProfileAvatar publicId={state.profileImagePublicId} size={36} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-brand-text truncate">{profile.name}</p>
-              <p className="text-xs text-brand-muted truncate">{profile.program}</p>
-            </div>
-          </div>
-        </div>
-      )}
+
     </aside>
   );
 }
