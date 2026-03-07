@@ -17,7 +17,7 @@ def process_webpages(pages: List[dict]):
     print(f"Received {len(pages)} pages for processing.")
     
     for page in pages:
-        time.sleep(15)  # Wait 15 seconds to avoid hitting Gemini Free Tier limits
+        time.sleep(4)  # Wait 4 seconds to avoid hitting Gemini Free Tier limits
         url = page.get("url", "")
         text = page.get("text", "")
         print(f"Extracting scholarships from: {url}")
