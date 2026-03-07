@@ -19,13 +19,19 @@ export default function ResumeUploader() {
       {
         cloudName: cloudinaryConfig.cloudName,
         uploadPreset: cloudinaryConfig.uploadPreset,
-        sources: ['local', 'url', 'camera'],
-        resourceType: 'auto',
-        maxFileSize: 10000000,
-        clientAllowedFormats: ['pdf', 'doc', 'docx'],
-        showAdvancedOptions: false,
-        cropping: false,
+        sources: [
+          'local',
+          'url',
+          'google_drive',
+          'dropbox'
+        ],
+        showAdvancedOptions: true,
+        cropping: true,
         multiple: false,
+        resourceType: 'auto',
+        clientAllowedFormats: ['pdf', 'doc', 'docx'],
+        maxFileSize: 10000000,
+        defaultSource: 'local',
         styles: {
           palette: { window: '#0F1624', sourceBg: '#080C14', windowBorder: '#1E2D4A', tabIcon: '#F5A623', inactiveTabIcon: '#6B7E9F', menuIcons: '#F5A623', link: '#F5A623', action: '#F5A623', inProgress: '#F5A623', complete: '#22C55E', error: '#EF4444', textDark: '#E8EDF5', textLight: '#6B7E9F' },
         },
@@ -109,7 +115,7 @@ export default function ResumeUploader() {
         </div>
         <span className="text-xs text-brand-muted/60">PDF, DOC, DOCX • Max 10MB</span>
       </button>
-      {/* <p className="text-xs text-brand-muted/50 mt-4">Securely processed via Cloudinary</p> */}
+      <p className="text-xs text-brand-muted//0 mt-4">Securely processed via Cloudinary</p>
     </div>
   );
 }
