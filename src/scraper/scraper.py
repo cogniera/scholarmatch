@@ -2,6 +2,7 @@ import os
 import requests
 import json
 from bs4 import BeautifulSoup
+from main import process_webpages
 
 # Hardcoded scholarship URLs to scrape
 SCHOLARSHIP_URLS = [
@@ -23,8 +24,6 @@ SCHOLARSHIP_URLS = [
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
-
-API_URL = "http://127.0.0.1:8000/process-webpages"
 
 def extract_text(url: str):
     """Fetches a URL and cleans HTML with BeautifulSoup to return pure text."""
@@ -66,14 +65,13 @@ def run_scraper():
         json.dump(all_pages, f, indent=4)
         
     print(f"\nSuccessfully saved raw text to raw_scraped_text.json.")
-    print(f"Sending JSON to API...")
+    print(f"Processing pages with Gemini...")
     
     try:
-        response = requests.post(API_URL, json=all_pages)
-        response.raise_for_status()
-        print("API Response:", response.json())
+        response = process_webpages(all_pages)
+        print("Process Response:", response)
     except Exception as e:
-        print(f"Failed to send to API: {e}")
+        print(f"Failed to process with Gemini: {e}")
 
 if __name__ == "__main__":
     run_scraper()

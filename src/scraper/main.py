@@ -1,33 +1,26 @@
 import os
 import json
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+import time
 from typing import List
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
-
-app = FastAPI(title="ScholarMatch Webhook API")
-
-class ScrapedPage(BaseModel):
-    url: str
-    text: str
-
-import time
-
-@app.post("/process-webpages")
-async def process_webpages(pages: List[ScrapedPage]):
+def process_webpages(pages: List[dict]):
+    # Load environment variables
+    load_dotenv()
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    
     all_scholarships = []
+    
     model = genai.GenerativeModel('gemini-2.5-flash') 
     
     print(f"Received {len(pages)} pages for processing.")
     
     for page in pages:
-        time.sleep(4)  # Wait 4 seconds to avoid hitting Gemini Free Tier 15 RPM limit
-        print(f"Extracting scholarships from: {page.url}")
+        time.sleep(15)  # Wait 15 seconds to avoid hitting Gemini Free Tier limits
+        url = page.get("url", "")
+        text = page.get("text", "")
+        print(f"Extracting scholarships from: {url}")
         prompt = f"""
         You are an expert data extraction algorithm. Find all the scholarships/bursaries mentioned in the text and extract their details into a strict JSON array format.
         
@@ -38,11 +31,11 @@ async def process_webpages(pages: List[ScrapedPage]):
         - description: String (A 2-3 sentence summary)
         - eligibility_keywords: Array of Strings (Things like "leadership", "indigenous", "entrance")
         
-        URL Source: {page.url}
+        URL Source: {url}
         
         Here is the webpage text:
         ---
-        {page.text}
+        {text}
         ---
         
         RESPOND ONLY WITH THE RAW JSON ARRAY. DO NOT ADD MARKDOWN CODE BLOCKS OR EXPLANATIONS.
@@ -59,7 +52,7 @@ async def process_webpages(pages: List[ScrapedPage]):
                 all_scholarships.extend(data)
                 
         except Exception as e:
-            print(f"Gemini AI Extraction Failed for {page.url}: {e}")
+            print(f"Gemini AI Extraction Failed for {url}: {e}")
             
     # Output the final compiled list to a JSON file
     output_file = 'scraped_scholarships.json'
@@ -82,6 +75,4 @@ async def process_webpages(pages: List[ScrapedPage]):
     }
 
 if __name__ == "__main__":
-    import uvicorn
-    print("Starting API Server...")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    print("This file contains the Gemini processing logic. Run scraper.py to start.")
