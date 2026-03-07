@@ -30,7 +30,7 @@ export default function CreateProfilePage() {
       <div className="w-full max-w-3xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-display font-bold text-white mb-3">Build Your Profile</h1>
+          <h1 className="text-4xl font-display font-bold text-brand-text mb-3">Build Your Profile</h1>
           <p className="text-brand-muted text-lg">Choose how our AI engine should learn about you.</p>
         </div>
 
@@ -41,14 +41,14 @@ export default function CreateProfilePage() {
             <button
               onClick={() => setTab('resume')}
               className={'flex-1 py-3 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ' +
-                (tab === 'resume' ? 'bg-brand-accent text-brand-bg shadow-lg' : 'text-brand-muted hover:text-white')}
+                (tab === 'resume' ? 'bg-brand-accent text-brand-bg shadow-lg' : 'text-brand-muted hover:text-brand-text')}
             >
               <FileText size={16} /> AI Resume Parse
             </button>
             <button
               onClick={() => setTab('manual')}
               className={'flex-1 py-3 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ' +
-                (tab === 'manual' ? 'bg-brand-accent text-brand-bg shadow-lg' : 'text-brand-muted hover:text-white')}
+                (tab === 'manual' ? 'bg-brand-accent text-brand-bg shadow-lg' : 'text-brand-muted hover:text-brand-text')}
             >
               <PenLine size={16} /> Manual Entry
             </button>

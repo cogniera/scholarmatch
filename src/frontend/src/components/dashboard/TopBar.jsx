@@ -29,7 +29,7 @@ export default function TopBar() {
       {/* Notifications */}
       <div className="relative" ref={notifRef}>
         <button onClick={() => { setShowNotif(!showNotif); setShowProfile(false); }}
-          className="p-2.5 hover:bg-brand-surface rounded-lg transition-colors relative text-brand-muted hover:text-white">
+          className="p-2.5 hover:bg-brand-surface rounded-lg transition-colors relative text-brand-muted hover:text-brand-text">
           <Bell size={20} />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 w-4 h-4 bg-brand-accent text-brand-bg text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -47,7 +47,7 @@ export default function TopBar() {
           <ProfileAvatar publicId={state.profileImagePublicId} size={32} />
           {state.profile && (
             <div className="text-left hidden md:block">
-              <p className="text-sm font-medium text-white leading-tight">{state.profile.name}</p>
+              <p className="text-sm font-medium text-brand-text leading-tight">{state.profile.name}</p>
               <p className="text-xs text-brand-muted leading-tight">{state.profile.program}</p>
             </div>
           )}

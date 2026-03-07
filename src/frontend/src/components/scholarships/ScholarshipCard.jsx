@@ -13,37 +13,41 @@ export default function ScholarshipCard({ scholarship, onViewDetails }) {
 
   return (
     <div onClick={() => onViewDetails(scholarship)}
-      className="glass-card-hover p-5 cursor-pointer relative group">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-3">
-          <img src={scholarship.logoUrl} alt={scholarship.organization} className="w-10 h-10 rounded-lg object-cover" />
-          <div>
-            <h3 className="text-base font-display font-bold text-white group-hover:text-brand-accent transition-colors">{scholarship.name}</h3>
-            <p className="text-xs text-brand-muted">{scholarship.organization}</p>
-          </div>
-        </div>
+      className="glass-card-hover p-6 cursor-pointer relative group flex flex-col pt-12">
+      
+      {/* Absolute Header row: Bookmark (Left), Match Badge (Right) */}
+      <button onClick={toggleSave}
+        className={'absolute top-4 left-4 p-2 rounded-md transition-colors ' + (isSaved ? 'text-brand-accent bg-brand-accent/10' : 'text-brand-muted hover:text-brand-accent hover:bg-brand-bg')}>
+        <Bookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
+      </button>
+
+      <div className="absolute top-4 right-4">
         <MatchScoreBadge score={scholarship.matchScore} />
       </div>
 
-      <div className="flex items-center gap-4 mt-4">
-        <span className="text-lg font-display font-bold text-brand-accent">
-          ${scholarship.amount.toLocaleString()}
-          <span className="text-xs font-body text-brand-muted ml-1">{scholarship.currency}</span>
-        </span>
-        <span className="text-xs text-brand-muted">Due: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+      {/* Card Body */}
+      <div className="flex items-center gap-4 mb-4">
+        <img src={scholarship.logoUrl} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
+        <div>
+          <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name}</h3>
+          <p className="text-sm text-brand-muted">{scholarship.organization}</p>
+        </div>
       </div>
 
-      <div className="flex gap-1.5 mt-3 flex-wrap">
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-brand-border/50">
+        <span className="text-xl font-display font-bold text-brand-accent">
+          ${scholarship.amount.toLocaleString()}
+        </span>
+        <span className="text-sm font-medium text-brand-muted bg-brand-bg px-3 py-1 rounded-md">
+          Due: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mt-4 flex-wrap">
         {scholarship.tags.slice(0, 3).map(tag => (
-          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-brand-bg border border-brand-border text-brand-muted">{tag}</span>
+          <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-brand-bg border border-brand-border text-brand-muted font-medium">{tag}</span>
         ))}
       </div>
-
-      {/* Save bookmark */}
-      <button onClick={toggleSave}
-        className={'absolute top-4 right-4 p-1.5 rounded-md transition-colors ' + (isSaved ? 'text-brand-accent bg-brand-accent/10' : 'text-brand-muted hover:text-brand-accent')}>
-        <Bookmark size={16} fill={isSaved ? 'currentColor' : 'none'} />
-      </button>
     </div>
   );
 }

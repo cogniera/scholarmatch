@@ -17,7 +17,7 @@ export default function RoadmapPage() {
   return (
     <div className="animate-fade-in max-w-4xl space-y-8">
       <div>
-        <h1 className="text-3xl font-display font-bold text-white">Scholarship Roadmap</h1>
+        <h1 className="text-3xl font-display font-bold text-brand-text">Scholarship Roadmap</h1>
         <p className="text-brand-muted mt-1">Unlock your full scholarship potential with these steps.</p>
       </div>
 
@@ -28,7 +28,7 @@ export default function RoadmapPage() {
             <Target className="text-brand-accent" size={24} />
           </div>
           <div>
-            <h3 className="font-display font-bold text-white text-lg">
+            <h3 className="font-display font-bold text-brand-text text-lg">
               You qualify for {qualifiedScholarships.length} scholarships worth ${qualifiedValue.toLocaleString()}
             </h3>
             <p className="text-brand-muted text-sm mt-1">
@@ -63,7 +63,7 @@ export default function RoadmapPage() {
                         <span className={'text-xs px-2 py-0.5 rounded-full font-semibold ' + config.badge}>{config.label}</span>
                         <span className="text-xs text-brand-muted">Step {idx + 1}</span>
                       </div>
-                      <h3 className="font-display font-bold text-white text-base">{step.title}</h3>
+                      <h3 className="font-display font-bold text-brand-text text-base">{step.title}</h3>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
                       <div className="flex items-center gap-1 text-brand-accent">

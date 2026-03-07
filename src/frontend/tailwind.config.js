@@ -8,13 +8,13 @@ export default {
     extend: {
       colors: {
         brand: {
-          bg: '#080C14',
-          surface: '#0F1624',
-          border: '#1E2D4A',
+          bg: '#F8FAFC',
+          surface: '#FFFFFF',
+          border: '#E2E8F0',
           accent: '#F5A623',
           accentHover: '#E09010',
-          text: '#E8EDF5',
-          muted: '#6B7E9F',
+          text: '#0F172A',
+          muted: '#64748B',
           success: '#22C55E',
           warning: '#EAB308',
           danger: '#EF4444',

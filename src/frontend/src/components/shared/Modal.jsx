@@ -15,8 +15,8 @@ export default function Modal({ isOpen, onClose, children, title }) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div className="relative glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in" onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 bg-brand-surface/90 backdrop-blur-md px-6 py-4 border-b border-brand-border flex items-center justify-between z-10">
-          <h2 className="text-lg font-display font-bold text-white">{title}</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-brand-bg rounded-lg text-brand-muted hover:text-white transition-colors">
+          <h2 className="text-lg font-display font-bold text-brand-text">{title}</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-brand-bg rounded-lg text-brand-muted hover:text-brand-text transition-colors">
             <X size={20} />
           </button>
         </div>
