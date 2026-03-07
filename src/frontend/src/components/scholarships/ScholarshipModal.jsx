@@ -2,10 +2,14 @@ import { Check, X as XIcon, ExternalLink, Share2, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getHighlightCardUrl } from '../../cloudinary/transformations';
 import Badge from '../shared/Badge';
+import { AdvancedVideo } from '@cloudinary/react';
+import { Cloudinary } from '@cloudinary/url-gen';
 
 export default function ScholarshipModal({ scholarship, onClose }) {
   const { state, dispatch } = useApp();
   if (!scholarship) return null;
+
+  const cld = new Cloudinary({ cloud: { cloudName: 'demo' } });
 
   const { aiAnalysis } = scholarship;
   const studentName = state.profile?.name || 'Student';
@@ -22,13 +26,25 @@ export default function ScholarshipModal({ scholarship, onClose }) {
 
   return (
     <>
-      {/* Banner */}
-      <img src={scholarship.bannerUrl} alt={scholarship.name} className="w-full h-48 object-cover rounded-lg mb-6" />
+      {/* Banner or Video Player (Side Quest 2) */}
+      {scholarship.videoUrl ? (
+        <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden mb-6 shadow-lg border border-brand-border bg-black flex items-center">
+          <AdvancedVideo
+            cldVid={cld.video(scholarship.videoUrl)}
+            controls
+            autoPlay
+            loop
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <img src={scholarship.bannerUrl} alt={scholarship.name} className="w-full h-48 md:h-56 object-cover rounded-xl mb-6 shadow-sm border border-brand-border/50" />
+      )}
 
       {/* Title + Amount */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-2xl font-display font-bold text-white">{scholarship.name}</h3>
+          <h3 className="text-2xl font-display font-bold text-brand-text">{scholarship.name}</h3>
           <p className="text-brand-muted">{scholarship.organization}</p>
         </div>
         <div className="text-right">
@@ -39,7 +55,7 @@ export default function ScholarshipModal({ scholarship, onClose }) {
 
       {/* AI Analysis */}
       <div className="bg-brand-bg rounded-xl p-5 border border-brand-border mb-6">
-        <h4 className="text-base font-display font-semibold text-white mb-4 flex items-center gap-2">
+        <h4 className="text-base font-display font-semibold text-brand-text mb-4 flex items-center gap-2">
           🤖 AI Eligibility Analysis
         </h4>
 
@@ -77,7 +93,7 @@ export default function ScholarshipModal({ scholarship, onClose }) {
 
       {/* Required Documents */}
       <div className="mb-6">
-        <h4 className="text-base font-display font-semibold text-white mb-3">Required Documents</h4>
+        <h4 className="text-base font-display font-semibold text-brand-text mb-3">Required Documents</h4>
         <div className="flex flex-wrap gap-2">
           {scholarship.requiredDocuments.map(doc => <Badge key={doc} variant="muted">{doc}</Badge>)}
         </div>
@@ -85,7 +101,7 @@ export default function ScholarshipModal({ scholarship, onClose }) {
 
       {/* Shareable Highlight Card */}
       <div className="glass-card p-4 mb-6">
-        <h4 className="text-sm font-display font-semibold text-white mb-3">📸 Share This Match (Cloudinary Transformation)</h4>
+        <h4 className="text-sm font-display font-semibold text-brand-text mb-3">📸 Share This Match (Cloudinary Transformation)</h4>
         <img src={highlightUrl} alt="Shareable highlight card" className="w-full rounded-lg mb-3" onError={e => { e.target.style.display = 'none'; }} />
         <button onClick={handleShare} className="btn-ghost text-sm w-full justify-center">
           <Share2 size={16} /> Share to Twitter @Cloudinary

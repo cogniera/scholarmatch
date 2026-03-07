@@ -10,7 +10,7 @@ export default function StatCard({ title, value, icon: Icon, trend, color = 'bra
         )}
       </div>
       <p className="text-sm text-brand-muted mb-1">{title}</p>
-      <h3 className="text-2xl font-display font-bold text-white">{value}</h3>
+      <h3 className="text-2xl font-display font-bold text-brand-text">{value}</h3>
     </div>
   );
 }

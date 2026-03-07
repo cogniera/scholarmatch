@@ -44,7 +44,7 @@ export default function ApplicationsPage() {
   return (
     <div className="animate-fade-in max-w-5xl space-y-6">
       <div>
-        <h1 className="text-3xl font-display font-bold text-white">Applications</h1>
+        <h1 className="text-3xl font-display font-bold text-brand-text">Applications</h1>
         <p className="text-brand-muted mt-1">Track your scholarship application progress.</p>
       </div>
 
@@ -52,7 +52,7 @@ export default function ApplicationsPage() {
       <div className="flex gap-6">
         {Object.entries(counts).map(([label, count]) => (
           <div key={label}>
-            <span className="text-2xl font-display font-bold text-white">{count}</span>
+            <span className="text-2xl font-display font-bold text-brand-text">{count}</span>
             <span className="text-sm text-brand-muted ml-2">{label}</span>
           </div>
         ))}
@@ -63,7 +63,7 @@ export default function ApplicationsPage() {
         {tabs.map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={'px-4 py-2 rounded-md text-sm font-medium transition-all ' +
-              (tab === t ? 'bg-brand-accent text-brand-bg' : 'text-brand-muted hover:text-white')}>
+              (tab === t ? 'bg-brand-accent text-brand-bg' : 'text-brand-muted hover:text-brand-text')}>
             {t}
           </button>
         ))}
@@ -78,7 +78,7 @@ export default function ApplicationsPage() {
             <div key={app.id} className="glass-card p-5 flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-display font-bold text-white text-base truncate">{app.name}</h3>
+                  <h3 className="font-display font-bold text-brand-text text-base truncate">{app.name}</h3>
                   <Badge variant={config.variant}><StatusIcon size={12} className="mr-1" />{config.label}</Badge>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-brand-muted">

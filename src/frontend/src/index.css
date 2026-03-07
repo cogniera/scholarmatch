@@ -21,9 +21,9 @@
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 bg-brand-accent hover:bg-brand-accentHover text-brand-bg font-semibold rounded-lg
+    @apply px-6 py-3 bg-brand-accent hover:bg-brand-accentHover text-white font-semibold rounded-lg
            transition-all duration-200 inline-flex items-center gap-2 cursor-pointer
-           shadow-[0_0_20px_rgba(245,166,35,0.15)] hover:shadow-[0_0_30px_rgba(245,166,35,0.25)];
+           shadow-[0_4px_14px_rgba(245,166,35,0.4)] hover:shadow-[0_6px_20px_rgba(245,166,35,0.5)];
   }
   .btn-ghost {
     @apply px-6 py-3 bg-transparent border border-brand-border text-brand-text font-medium rounded-lg
@@ -31,10 +31,10 @@
            inline-flex items-center gap-2;
   }
   .glass-card {
-    @apply bg-brand-surface/70 backdrop-blur-lg border border-brand-border rounded-xl shadow-lg;
+    @apply bg-white border border-brand-border rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.04)];
   }
   .glass-card-hover {
-    @apply glass-card hover:-translate-y-1 hover:shadow-xl hover:border-brand-accent/30 transition-all duration-300;
+    @apply glass-card hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-brand-accent/30 transition-all duration-300;
   }
   .input-field {
     @apply w-full bg-brand-bg border border-brand-border rounded-lg py-2.5 px-4 text-brand-text
@@ -55,6 +55,6 @@
 
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #080C14; }
-::-webkit-scrollbar-thumb { background: #1E2D4A; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2a3f66; }
+::-webkit-scrollbar-track { background: #F8FAFC; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }

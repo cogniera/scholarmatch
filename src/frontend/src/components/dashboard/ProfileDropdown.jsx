@@ -18,16 +18,16 @@ export default function ProfileDropdown() {
         <div className="px-4 py-3 border-b border-brand-border flex items-center gap-3">
           <ProfileAvatar publicId={state.profileImagePublicId} size={40} />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{state.profile.name}</p>
+            <p className="text-sm font-semibold text-brand-text truncate">{state.profile.name}</p>
             <p className="text-xs text-brand-muted truncate">{state.profile.program} • {state.profile.university}</p>
           </div>
         </div>
       )}
       <button onClick={() => navigate('/dashboard/profile')}
-        className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-bg/50 flex items-center gap-2.5 text-brand-muted hover:text-white transition-colors">
+        className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-bg/50 flex items-center gap-2.5 text-brand-muted hover:text-brand-text transition-colors">
         <User size={16} /> Edit Profile
       </button>
-      <button className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-bg/50 flex items-center gap-2.5 text-brand-muted hover:text-white transition-colors">
+      <button className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-bg/50 flex items-center gap-2.5 text-brand-muted hover:text-brand-text transition-colors">
         <Settings size={16} /> Settings
       </button>
       <div className="h-px bg-brand-border my-1" />
