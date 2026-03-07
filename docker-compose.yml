@@ -1,27 +1,45 @@
-version: "3.9"
-
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./src/backend
     container_name: scholarmatch-backend
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend:/app
+      - ./src/backend/.env
+    # docker compose watch configuration
+    develop:
+      watch:
+        - action: sync
+          path: ./src/backend
+          target: /app
+          ignore:
+            - __pycache__/
+            - .venv/
+        - action: rebuild
+          path: ./src/backend/requirements.txt
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./src/frontend
+      target: development # explicitly target the dev stage of the multi-stage Dockerfile
     container_name: scholarmatch-frontend
     ports:
       - "80:80"
     env_file:
-      - ./frontend/.env_file
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./src/frontend/.env_file
+    # docker compose watch configuration
+    develop:
+      watch:
+        - action: sync
+          path: ./src/frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./src/frontend/package.json
     depends_on:
       - backend
     restart: unless-stopped
