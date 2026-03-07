@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: ./src/backend
+    container_name: scholarmatch-backend-prod
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./src/backend/.env
+    restart: always
+    # Note: In a real Vultr production environment, you may want to connect to a managed database
+    # and configure environment variables directly in the deployment UI or a secure secrets manager.
+
+  frontend:
+    build:
+      context: ./src/frontend
+      target: production # explicitly target the production stage (nginx) of the multi-stage Dockerfile
+    container_name: scholarmatch-frontend-prod
+    ports:
+      - "80:80"
+    env_file:
+      - ./src/frontend/.env_file
+    depends_on:
+      - backend
+    restart: always

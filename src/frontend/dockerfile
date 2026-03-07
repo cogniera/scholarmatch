@@ -1,12 +1,59 @@
-FROM node:20-alpine
+# ==========================================
+# 1. DEVELOPMENT STAGE
+# ==========================================
+# This stage is used for local development, primarily via `docker compose watch`.
+# It runs the Vite development server with hot-module replacement.
+FROM node:20-alpine AS development
 
+# Create app directory
 WORKDIR /app
 
+# Install dependencies (leverage caching by copying package.json first)
 COPY package*.json ./
 RUN npm install
 
+# Copy application source code
 COPY . .
 
+# Expose Vite's default port
 EXPOSE 80
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Keep the dev server running, making it accessible externally
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "80"]
+
+# ==========================================
+# 2. BUILD STAGE
+# ==========================================
+# This stage builds the static assets for production.
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source and build the app
+COPY . .
+RUN npm run build
+
+# ==========================================
+# 3. PRODUCTION STAGE
+# ==========================================
+# A minimal nginx image to serve the built static React app.
+FROM nginx:alpine AS production
+
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy static assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# (Optional) If you have a custom nginx config for React Router, copy it here:
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose standard HTTP port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
