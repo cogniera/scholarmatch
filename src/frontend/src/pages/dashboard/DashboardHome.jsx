@@ -3,7 +3,7 @@ import { GraduationCap, DollarSign, FileText, Activity, UploadCloud, Search, Map
 import { useApp } from '../../context/AppContext';
 import StatCard from '../../components/shared/StatCard';
 import { useEffect, useMemo, useState } from 'react';
-import { fetchMatches, fetchProfile } from '../../services/api';
+import { fetchMatches, fetchProfile, fetchDashboardStats, fetchUpcomingDeadlines } from '../../services/api';
 
 const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
@@ -11,7 +11,7 @@ function normalizeMatch(match, index) {
   const scholarship = match?.scholarship || {};
   const amountRaw = scholarship.amount;
   const amount = Number(amountRaw);
-  const matchScoreRaw = match?.match_score;
+  const matchScoreRaw = match?.ai_match_score ?? match?.match_score;
   const matchScore = Number(matchScoreRaw);
 
   return {
@@ -24,6 +24,7 @@ function normalizeMatch(match, index) {
     matchScore: Number.isFinite(matchScore) ? Math.round(matchScore) : null,
     tags: [scholarship.program, scholarship.academic_level, scholarship.location].filter(Boolean),
     logoUrl: 'https://res.cloudinary.com/demo/image/upload/c_thumb,w_80,h_80,r_max/cld-sample-2',
+    link: scholarship.link || null,
   };
 }
 
@@ -38,6 +39,9 @@ export default function DashboardHome() {
   const [backendMatches, setBackendMatches] = useState([]);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
 
+  const [stats, setStats] = useState(null);
+  const [deadlines, setDeadlines] = useState([]);
+
   useEffect(() => {
     let active = true;
 
@@ -49,15 +53,19 @@ export default function DashboardHome() {
         if (active) {
           setBackendProfile(null);
           setBackendMatches([]);
+          setStats(null);
+          setDeadlines([]);
           setIsDashboardLoading(false);
         }
         return;
       }
 
       try {
-        const [profile, matchesResponse] = await Promise.all([
+        const [profile, matchesResponse, statsRes, deadlinesRes] = await Promise.all([
           fetchProfile(userId),
           fetchMatches(userId, false),
+          fetchDashboardStats(userId).catch(() => null),
+          fetchUpcomingDeadlines(userId, 5).catch(() => ({ deadlines: [] })),
         ]);
 
         if (!active) return;
@@ -65,10 +73,14 @@ export default function DashboardHome() {
         const rawMatches = Array.isArray(matchesResponse?.matches) ? matchesResponse.matches : [];
         setBackendProfile(profile || null);
         setBackendMatches(rawMatches.map((match, index) => normalizeMatch(match, index)));
+        setStats(statsRes || null);
+        setDeadlines(Array.isArray(deadlinesRes?.deadlines) ? deadlinesRes.deadlines : []);
       } catch {
         if (!active) return;
         setBackendProfile(null);
         setBackendMatches([]);
+        setStats(null);
+        setDeadlines([]);
       } finally {
         if (active) {
           setIsDashboardLoading(false);
@@ -105,36 +117,37 @@ export default function DashboardHome() {
     return cards;
   }, [topMatches]);
 
-  const upcomingDeadlines = useMemo(
-    () => [...backendMatches]
-      .filter((s) => isValidDate(s.deadline))
+  // Upcoming deadlines from API (future only, nearest first)
+  const upcomingDeadlines = useMemo(() => {
+    if (deadlines.length > 0) return deadlines.slice(0, 3);
+    return [...backendMatches]
+      .filter((s) => isValidDate(s.deadline) && new Date(s.deadline) >= new Date())
       .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-      .slice(0, 3),
-    [backendMatches],
-  );
+      .slice(0, 3);
+  }, [deadlines, backendMatches]);
 
-  // Stats are backend-field driven only; if backend does not provide these values, show '!'.
-  const matchedScholarships = Number(backendProfile?.matched_scholarships);
+  // Stats from dashboard API (real DB data)
+  const matchedScholarships = Number(stats?.matched_scholarships);
   const matchedScholarshipsValue = isDashboardLoading
     ? 'Loading...'
-    : (Number.isFinite(matchedScholarships) ? matchedScholarships : '!');
+    : (Number.isFinite(matchedScholarships) ? matchedScholarships : 0);
 
-  const totalValueMatched = Number(backendProfile?.total_value_matched);
+  const totalValueMatched = Number(stats?.total_value_matched);
   const totalValueLabel = isDashboardLoading
     ? 'Loading...'
     : (Number.isFinite(totalValueMatched) && totalValueMatched > 0
       ? '$' + totalValueMatched.toLocaleString()
-      : '!');
+      : '$0');
 
-  const applicationsStarted = Number(backendProfile?.applications_started);
+  const applicationsStarted = Number(stats?.applications_started);
   const applicationsStartedLabel = isDashboardLoading
     ? 'Loading...'
-    : (Number.isFinite(applicationsStarted) ? applicationsStarted : '!');
+    : (Number.isFinite(applicationsStarted) ? applicationsStarted : 0);
 
-  const profileStrength = Number(backendProfile?.profile_strength);
+  const profileStrength = Number(stats?.profile_strength ?? backendProfile?.profile_strength);
   const profileStrengthLabel = isDashboardLoading
     ? 'Loading...'
-    : (Number.isFinite(profileStrength) ? `${profileStrength}%` : '!');
+    : (Number.isFinite(profileStrength) ? `${profileStrength}%` : '0%');
 
   const formatAmount = (amount, currency = 'USD') => {
     if (!Number.isFinite(amount) || amount < 0) return '!';
@@ -183,7 +196,7 @@ export default function DashboardHome() {
                 </div>
 
                 <div className="text-right">
-                  <p className="text-3xl font-display font-bold text-brand-danger">{s.matchScore ?? '!'}</p>
+                  <p className="text-3xl font-display font-bold text-brand-danger">{s.matchScore != null ? `${s.matchScore}%` : '—'}</p>
                   <p className="text-sm font-semibold tracking-wide text-brand-muted">MATCH</p>
                 </div>
               </div>
@@ -195,8 +208,8 @@ export default function DashboardHome() {
                   className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0"
                 />
                 <div className="flex-1 min-w-0 pr-4">
-                  <h3 className="text-lg font-display font-bold text-brand-text leading-tight mb-1">{s.name || '!'}</h3>
-                  <p className="text-sm text-brand-muted truncate">{s.organization || '!'}</p>
+                  <h3 className="text-lg font-display font-bold text-brand-text leading-tight mb-1">{s.name || '—'}</h3>
+                  <p className="text-sm text-brand-muted truncate">{s.organization || '—'}</p>
                 </div>
               </div>
 
@@ -211,7 +224,7 @@ export default function DashboardHome() {
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-brand-border/50 mt-auto">
-                <span className="text-xl font-display font-bold text-brand-accent">{formatAmount(s.amount, s.currency)}</span>
+                <span className="text-xl font-display font-bold text-brand-accent">{formatAmount(s.amount, s.currency) !== '!' ? formatAmount(s.amount, s.currency) : '$0'}</span>
                 <span className="text-sm font-medium text-brand-muted bg-brand-bg px-3 py-1 rounded-md">Due: {formatDueDate(s.deadline)}</span>
               </div>
             </article>
@@ -229,9 +242,9 @@ export default function DashboardHome() {
           <div className="space-y-3">
             {upcomingDeadlines.map(s => {
               const daysLeft = Math.max(0, Math.ceil((new Date(s.deadline) - new Date()) / (1000 * 60 * 60 * 24)));
-              const nameLabel = s.name || '!';
-              const organizationLabel = s.organization || '!';
-              const amountLabel = formatAmount(s.amount, s.currency);
+              const nameLabel = s.name || s.title || '—';
+              const organizationLabel = s.organization || s.provider || '—';
+              const amountLabel = formatAmount(s.amount, s.currency) === '!' ? '$0' : formatAmount(s.amount, s.currency);
               return (
                 <div key={s.id} className="flex items-center justify-between py-2 border-b border-brand-border/30 last:border-0">
                   <div>
@@ -246,7 +259,7 @@ export default function DashboardHome() {
             })}
           </div>
         ) : (
-          <div className="py-2 text-center text-3xl font-display font-bold text-brand-text">!</div>
+          <div className="py-2 text-center text-brand-muted">No upcoming deadlines</div>
         )}
       </div>
 

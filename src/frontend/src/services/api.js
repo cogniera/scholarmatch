@@ -196,6 +196,39 @@ export async function fetchMatchRun(userId, runId, token = null) {
   return res.json();
 }
 
+export async function fetchDashboardStats(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/dashboard/stats`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+  return res.json();
+}
+
+export async function fetchUpcomingDeadlines(userId, limit = 5, token = null) {
+  const res = await fetch(`${BASE_URL}/dashboard/upcoming-deadlines?limit=${limit}`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch deadlines');
+  return res.json();
+}
+
+export async function fetchRoadmap(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/roadmap`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch roadmap');
+  return res.json();
+}
+
+export async function generateRoadmap(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/roadmap/generate`, {
+    method: 'POST',
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to generate roadmap');
+  return res.json();
+}
+
 /**
  * Send a chat message to the AI assistant.
  *

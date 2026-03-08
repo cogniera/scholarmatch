@@ -34,8 +34,8 @@ def list_scholarships(
 
 @router.get("/match")
 def get_matches(
-    explain: bool = Query(False, description="Run AI compare/judge/next-steps on top 10 (slower)"),
-    top_n: int = Query(10, ge=1, le=10, description="Number of top matches for AI enrichment"),
+    explain: bool = Query(False, description="Run AI compare/judge/next-steps on top 3 (slower)"),
+    top_n: int = Query(3, ge=1, le=10, description="Number of top matches for AI enrichment (default 3)"),
     user_id: str = Depends(get_user_id),
 ):
     """
@@ -91,13 +91,16 @@ def get_matches(
                 m["ai_explanation"] = result.get("ai_explanation", "")
                 m["next_steps"] = result.get("next_steps", [])
                 m["overall_recommendation"] = result.get("overall_recommendation", "medium")
+                m["ai_match_score"] = result.get("ai_match_score", 75)
                 row["ai_explanation"] = m["ai_explanation"]
                 row["overall_recommendation"] = m["overall_recommendation"]
                 row["next_steps"] = m["next_steps"]
+                row["ai_match_score"] = m["ai_match_score"]
             except Exception:
                 m["ai_explanation"] = "Unable to generate explanation at this time."
                 m["next_steps"] = []
                 m["overall_recommendation"] = "medium"
+                m["ai_match_score"] = 75
 
         try:
             db.table("matches").insert(row).execute()

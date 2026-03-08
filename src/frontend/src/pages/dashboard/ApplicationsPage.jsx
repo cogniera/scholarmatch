@@ -46,12 +46,13 @@ export default function ApplicationsPage() {
 
           return {
             id: scholarship.id ?? `app-${index}`,
-            name: scholarship.title || '!',
+            name: scholarship.title || '—',
             amount: Number.isFinite(amount) ? amount : null,
             deadline: scholarship.deadline || null,
+            link: scholarship.link || null,
             status: typeof item?.application_status === 'string' && item.application_status.trim()
               ? item.application_status.trim().toLowerCase()
-              : '!',
+              : 'saved',
             progress: Number.isFinite(progress) ? progress : 0,
           };
         });
@@ -133,11 +134,12 @@ export default function ApplicationsPage() {
         {filtered.map(app => {
           const config = statusVariants[app.status] || statusVariants['!'];
           const StatusIcon = config.icon;
+          const viewUrl = app.link || '#';
           return (
             <div key={app.id} className="glass-card p-5 flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-display font-bold text-brand-text text-base truncate">{app.name || '!'}</h3>
+                  <h3 className="font-display font-bold text-brand-text text-base truncate">{app.name || '—'}</h3>
                   <Badge variant={config.variant}><StatusIcon size={12} className="mr-1" />{config.label}</Badge>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-brand-muted">
@@ -148,9 +150,14 @@ export default function ApplicationsPage() {
                   <div className="mt-2 max-w-xs"><ProgressBar value={app.progress} /></div>
                 )}
               </div>
-              <button className="btn-ghost text-sm flex-shrink-0">
+              <a
+                href={viewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost text-sm flex-shrink-0"
+              >
                 {app.status === 'saved' ? 'Start' : 'View'} <ArrowRight size={14} />
-              </button>
+              </a>
             </div>
           );
         })}

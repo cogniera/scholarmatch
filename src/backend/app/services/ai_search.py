@@ -106,6 +106,7 @@ def run_compare_agent(
 
     user_message = f"""Compare this student with this scholarship and return a JSON object with:
 - is_good_match (boolean)
+- ai_match_score (integer 0-100: overall match percentage from AI perspective)
 - reasons (list of strings)
 - risks_or_gaps (list of strings)
 - ideal_candidate_profile (string)
@@ -130,6 +131,7 @@ Existing match reasons:
     if not raw:
         return {
             "is_good_match": True,
+            "ai_match_score": 75,
             "reasons": match_reasons or [],
             "risks_or_gaps": [],
             "ideal_candidate_profile": "",
@@ -149,6 +151,7 @@ Existing match reasons:
     except json.JSONDecodeError:
         return {
             "is_good_match": True,
+            "ai_match_score": 75,
             "reasons": [raw[:200]] if raw else match_reasons,
             "risks_or_gaps": [],
             "ideal_candidate_profile": "",
@@ -262,8 +265,19 @@ def run_ai_loop(
     reasons = compare_result.get("reasons", match_reasons) if compare_result else match_reasons
     ai_explanation = "; ".join(reasons) if isinstance(reasons, list) else str(reasons)
 
+    # AI match percentage 0-100 from compare agent
+    ai_match_score = compare_result.get("ai_match_score") if compare_result else None
+    if ai_match_score is not None:
+        try:
+            ai_match_score = max(0, min(100, int(ai_match_score)))
+        except (TypeError, ValueError):
+            ai_match_score = 75
+    else:
+        ai_match_score = 75
+
     return {
         "ai_explanation": ai_explanation,
         "next_steps": next_steps_result.get("steps", []),
         "overall_recommendation": next_steps_result.get("overall_recommendation", "medium"),
+        "ai_match_score": ai_match_score,
     }

@@ -39,6 +39,7 @@ alter table public.users
     add column if not exists demographics jsonb,
     add column if not exists career_interests text,
     add column if not exists profile_summary text,
+    add column if not exists university text,
     -- Embedding over extracurriculars + career_interests + profile_summary.
     add column if not exists qualities_embedding vector(768);
 
@@ -55,7 +56,8 @@ alter table public.matches
     add column if not exists ai_rank integer,
     add column if not exists run_id uuid,
     add column if not exists overall_recommendation text,
-    add column if not exists next_steps jsonb;
+    add column if not exists next_steps jsonb,
+    add column if not exists ai_match_score integer;
 
 create index if not exists idx_matches_user_run
     on public.matches (user_id, run_id);
@@ -79,4 +81,20 @@ create table if not exists public.match_runs (
 
 create index if not exists idx_match_runs_user_created_at
     on public.match_runs (user_id, created_at desc);
+
+
+-- ============================================================================
+-- 5) User roadmaps table (AI-generated plan from top 3 recommendations)
+-- ============================================================================
+
+create table if not exists public.user_roadmaps (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null,
+    created_at timestamptz not null default now(),
+    steps jsonb not null default '[]',
+    config jsonb
+);
+
+create index if not exists idx_user_roadmaps_user_created
+    on public.user_roadmaps (user_id, created_at desc);
 

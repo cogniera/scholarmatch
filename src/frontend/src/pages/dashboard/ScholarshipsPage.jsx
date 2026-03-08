@@ -10,7 +10,7 @@ const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 function normalizeMatchForUi(match, index) {
   const scholarship = match?.scholarship || {};
   const amount = Number(scholarship.amount);
-  const score = Number(match?.match_score);
+  const score = Number(match?.ai_match_score ?? match?.match_score);
 
   return {
     id: scholarship.id ?? `match-${index}`,

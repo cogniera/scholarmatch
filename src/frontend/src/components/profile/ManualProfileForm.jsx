@@ -16,8 +16,10 @@ export default function ManualProfileForm({
     gpa: 3.0,
     academic_level: 'Undergraduate',
     location: '',
+    university: '',
     financial_need: false,
     extracurriculars: '',
+    career_interests: '',
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -74,6 +76,13 @@ export default function ManualProfileForm({
           </div>
         </div>
         <div>
+          <label className="block text-sm font-medium text-brand-muted mb-2">University</label>
+          <div className="relative">
+            <GraduationCap className="absolute left-3 top-3 text-brand-muted" size={16} />
+            <input type="text" className="input-field pl-10" placeholder="University of Toronto" value={form.university} onChange={e => update('university', e.target.value)} />
+          </div>
+        </div>
+        <div>
           <label className="block text-sm font-medium text-brand-muted mb-2">
             Current GPA: <span className="text-brand-accent font-bold">{form.gpa.toFixed(1)}</span>
           </label>
@@ -109,6 +118,20 @@ export default function ManualProfileForm({
             placeholder="Clubs, volunteering, projects, leadership, competitions..."
             value={form.extracurriculars}
             onChange={e => update('extracurriculars', e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-brand-muted mb-2">Career Interests / Interests</label>
+        <div className="relative">
+          <Briefcase className="absolute left-3 top-3 text-brand-muted" size={16} />
+          <input
+            type="text"
+            className="input-field pl-10"
+            placeholder="e.g. Software engineering, Research, Healthcare..."
+            value={form.career_interests}
+            onChange={e => update('career_interests', e.target.value)}
           />
         </div>
       </div>

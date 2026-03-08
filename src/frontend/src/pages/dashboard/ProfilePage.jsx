@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const profileStrength = Number(profile?.profile_strength);
   const profileStrengthLabel = loading
     ? 'Loading...'
-    : (Number.isFinite(profileStrength) ? `${profileStrength}%` : '!');
+    : (Number.isFinite(profileStrength) ? `${profileStrength}%` : '0%');
   const profileStrengthValue = Number.isFinite(profileStrength) ? profileStrength : 0;
 
   const suggestions = useMemo(() => {
@@ -68,17 +68,17 @@ export default function ProfilePage() {
     return list.length > 0 ? list : ['Your backend profile looks complete.'];
   }, [loading, profile, state.profileImagePublicId]);
 
-  const gpaLabel = Number.isFinite(Number(profile?.gpa)) ? Number(profile.gpa).toFixed(1) : '!';
-  const academicLevelLabel = profile?.academic_level || '!';
-  const locationLabel = profile?.location || '!';
-  const universityLabel = profile?.university || '!';
-  const programLabel = profile?.program || '!';
-  const extracurricularsLabel = profile?.extracurriculars || '!';
+  const gpaLabel = Number.isFinite(Number(profile?.gpa)) ? Number(profile.gpa).toFixed(1) : '—';
+  const academicLevelLabel = profile?.academic_level || '—';
+  const locationLabel = profile?.location || '—';
+  const universityLabel = profile?.university || '—';
+  const programLabel = profile?.program || '—';
+  const extracurricularsLabel = profile?.extracurriculars || '—';
   const careerInterestsLabel = Array.isArray(profile?.career_interests)
-    ? (profile.career_interests.join(', ') || '!')
-    : (profile?.career_interests || '!');
-  const profileName = loading ? 'Loading...' : (profile?.name || '!');
-  const emailLabel = profile?.email || '!';
+    ? (profile.career_interests.join(', ') || '—')
+    : (profile?.career_interests || '—');
+  const profileName = loading ? 'Loading...' : (profile?.name || '—');
+  const emailLabel = profile?.email || '—';
 
   return (
     <div className="animate-fade-in max-w-5xl space-y-8">
@@ -118,7 +118,7 @@ export default function ProfilePage() {
                 { icon: GraduationCap, label: 'University', value: universityLabel },
                 { icon: BookOpen, label: 'Program', value: programLabel },
                 { icon: Briefcase, label: 'Extracurriculars', value: extracurricularsLabel },
-                { icon: Briefcase, label: 'Career Interests', value: careerInterestsLabel },
+                { icon: Briefcase, label: 'Interests', value: careerInterestsLabel },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3">
                   <div className="p-2 bg-brand-surface rounded-lg"><item.icon size={16} className="text-brand-muted" /></div>

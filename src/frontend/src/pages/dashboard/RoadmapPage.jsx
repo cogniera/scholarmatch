@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProgressBar from '../../components/shared/ProgressBar';
-import { Lock, CheckCircle2, Loader2, DollarSign, Target } from 'lucide-react';
-import { fetchMatches, fetchProfile } from '../../services/api';
+import { Lock, CheckCircle2, Loader2, DollarSign, Target, Wand2 } from 'lucide-react';
+import { fetchMatches, fetchProfile, fetchRoadmap, generateRoadmap } from '../../services/api';
 
 const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
@@ -102,45 +102,52 @@ function createRoadmapSteps(profile, matches) {
 export default function RoadmapPage() {
   const [profile, setProfile] = useState(null);
   const [matches, setMatches] = useState([]);
+  const [roadmapSteps, setRoadmapSteps] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+
+  const loadRoadmapData = async () => {
+    const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
+    if (!userId) return;
+
+    setLoading(true);
+    try {
+      const [profileResponse, matchesResponse, roadmapResponse] = await Promise.all([
+        fetchProfile(userId),
+        fetchMatches(userId, false),
+        fetchRoadmap(userId).catch(() => ({ steps: [] })),
+      ]);
+
+      setProfile(profileResponse || null);
+      const rawMatches = Array.isArray(matchesResponse?.matches) ? matchesResponse.matches : [];
+      setMatches(rawMatches.map(normalizeMatch));
+      setRoadmapSteps(Array.isArray(roadmapResponse?.steps) ? roadmapResponse.steps : null);
+    } catch {
+      setProfile(null);
+      setMatches([]);
+      setRoadmapSteps(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let active = true;
-
-    const loadRoadmapData = async () => {
-      if (active) setLoading(true);
-
-      try {
-        const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
-        if (!userId) {
-          throw new Error('missing_user_id');
-        }
-
-        const [profileResponse, matchesResponse] = await Promise.all([
-          fetchProfile(userId),
-          fetchMatches(userId, false),
-        ]);
-
-        if (!active) return;
-
-        setProfile(profileResponse || null);
-        const rawMatches = Array.isArray(matchesResponse?.matches) ? matchesResponse.matches : [];
-        setMatches(rawMatches.map(normalizeMatch));
-      } catch {
-        if (!active) return;
-        setProfile(null);
-        setMatches([]);
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
     loadRoadmapData();
-
-    return () => {
-      active = false;
-    };
   }, []);
+
+  const handleGenerate = async () => {
+    const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
+    if (!userId || generating) return;
+    setGenerating(true);
+    try {
+      const res = await generateRoadmap(userId);
+      setRoadmapSteps(Array.isArray(res?.steps) ? res.steps : []);
+    } catch {
+      setRoadmapSteps(null);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const qualifiedScholarships = useMemo(
     () => matches.filter((s) => Number.isFinite(s.matchScore) && s.matchScore >= 80),
@@ -152,14 +159,15 @@ export default function RoadmapPage() {
     [matches],
   );
 
-  const roadmapSteps = useMemo(() => createRoadmapSteps(profile, matches), [profile, matches]);
+  const computedSteps = useMemo(() => createRoadmapSteps(profile, matches), [profile, matches]);
+  const stepsToShow = roadmapSteps && roadmapSteps.length > 0 ? roadmapSteps : computedSteps;
   const totalUnlockable = useMemo(
-    () => roadmapSteps.reduce((sum, s) => sum + (Number.isFinite(s.unlockValue) ? s.unlockValue : 0), 0),
-    [roadmapSteps],
+    () => stepsToShow.reduce((sum, s) => sum + (Number.isFinite(s.unlockValue) ? s.unlockValue : 0), 0),
+    [stepsToShow],
   );
   const unlockCountTotal = useMemo(
-    () => roadmapSteps.reduce((sum, s) => sum + (Number.isFinite(s.unlockCount) ? s.unlockCount : 0), 0),
-    [roadmapSteps],
+    () => stepsToShow.reduce((sum, s) => sum + (Number.isFinite(s.unlockCount) ? s.unlockCount : 0), 0),
+    [stepsToShow],
   );
 
   const qualifiedCountLabel = loading ? 'Loading...' : qualifiedScholarships.length;
@@ -174,20 +182,30 @@ export default function RoadmapPage() {
         <p className="text-brand-muted mt-1">Unlock your full scholarship potential with these steps.</p>
       </div>
 
-      {/* Gap Analysis Summary */}
+      {/* Gap Analysis Summary + Generate */}
       <div className="glass-card p-6 border-brand-accent/20">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-brand-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Target className="text-brand-accent" size={24} />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-brand-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Target className="text-brand-accent" size={24} />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-brand-text text-lg">
+                You qualify for {qualifiedCountLabel} scholarships worth {qualifiedValueLabel}
+              </h3>
+              <p className="text-brand-muted text-sm mt-1">
+                Complete the steps below to unlock <span className="text-brand-accent font-semibold">{unlockCountLabel} more scholarships</span> worth up to <span className="text-brand-accent font-semibold">{totalUnlockableLabel}</span>.
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-display font-bold text-brand-text text-lg">
-              You qualify for {qualifiedCountLabel} scholarships worth {qualifiedValueLabel}
-            </h3>
-            <p className="text-brand-muted text-sm mt-1">
-              Complete the steps below to unlock <span className="text-brand-accent font-semibold">{unlockCountLabel} more scholarships</span> worth up to <span className="text-brand-accent font-semibold">{totalUnlockableLabel}</span>.
-            </p>
-          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={generating || loading}
+            className="btn-primary flex-shrink-0"
+          >
+            {generating ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
+            {generating ? ' Generating...' : ' Generate AI Roadmap'}
+          </button>
         </div>
       </div>
 
@@ -197,7 +215,7 @@ export default function RoadmapPage() {
         <div className="absolute left-3 top-0 bottom-0 w-px bg-brand-border" />
 
         <div className="space-y-6">
-          {roadmapSteps.map((step, idx) => {
+          {stepsToShow.map((step, idx) => {
             const config = statusConfig[step.status];
             const Icon = config.icon;
             const unlockValueLabel = Number.isFinite(step.unlockValue) ? `$${step.unlockValue.toLocaleString()}` : '!';
