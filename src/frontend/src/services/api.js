@@ -182,6 +182,21 @@ export async function fetchMatches(userId, explain = false, token = null) {
 }
 
 /**
+ * Fetch results of a previous recommendation run.
+ *
+ * @param {string} userId - Profile id
+ * @param {string} runId - Match run id from fetchMatches response
+ */
+export async function fetchMatchRun(userId, runId, token = null) {
+  const res = await fetch(`${BASE_URL}/scholarships/match-runs/${runId}`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch match run');
+  return res.json();
+}
+
+/**
  * Send a chat message to the AI assistant.
  *
  * @param {string} userId - Profile id persisted in local storage

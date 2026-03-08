@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, Wand2, LoaderCircle } from 'lucide-react';
 import ScholarshipCard from '../../components/scholarships/ScholarshipCard';
 import ScholarshipModal from '../../components/scholarships/ScholarshipModal';
 import Modal from '../../components/shared/Modal';
@@ -26,10 +26,12 @@ function normalizeMatchForUi(match, index) {
     tags: [scholarship.program, scholarship.academic_level, scholarship.location].filter(Boolean),
     aiAnalysis: {
       whyYouQualify: Array.isArray(match?.match_reasons) ? match.match_reasons : [],
-      requirementsMet: [],
-      requirementsMissing: [],
-      improvementTip: '',
+      aiExplanation: match?.ai_explanation || '',
+      eligibilityReason: match?.eligibility_reason || '',
     },
+    scoreComponents: match?.score_components || null,
+    nextSteps: Array.isArray(match?.next_steps) ? match.next_steps : [],
+    overallRecommendation: match?.overall_recommendation || null,
     applicationUrl: scholarship.link || '#',
     requiredDocuments: [],
   };
@@ -43,6 +45,7 @@ export default function ScholarshipsPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [loadingAi, setLoadingAi] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -84,6 +87,23 @@ export default function ScholarshipsPage() {
       active = false;
     };
   }, []);
+
+  const handleRefineWithAi = async () => {
+    const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
+    if (!userId || loadingAi) return;
+    setLoadingAi(true);
+    setLoadError('');
+    try {
+      const response = await fetchMatches(userId, true);
+      const raw = Array.isArray(response?.matches) ? response.matches : [];
+      const normalized = raw.map((item, index) => normalizeMatchForUi(item, index));
+      setMatches(normalized);
+    } catch {
+      setLoadError('AI refinement failed. Please try again.');
+    } finally {
+      setLoadingAi(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = [...matches]
@@ -127,6 +147,15 @@ export default function ScholarshipsPage() {
             <option value={90}>90%+</option>
           </select>
         </div>
+        <button
+          type="button"
+          onClick={handleRefineWithAi}
+          disabled={loadingAi || matches.length === 0}
+          className="btn-primary text-sm py-2 px-4 disabled:opacity-60"
+        >
+          {loadingAi ? <LoaderCircle size={16} className="animate-spin" /> : <Wand2 size={16} />}
+          {loadingAi ? ' Refining with AI...' : ' Refine with AI'}
+        </button>
       </div>
 
       {loadError && (

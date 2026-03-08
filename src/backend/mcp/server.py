@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import date, datetime
 from mcp.server.fastmcp import FastMCP
 
 # Create the MCP server
@@ -108,6 +109,69 @@ def normalize_profile_json(
     """
     # already structured, just propagate
     return {"qualities": profile.get("qualities", [])}
+
+
+@mcp.tool()
+def web_search(query: str) -> dict[str, Any]:
+    """
+    General web search to confirm deadlines or pull official scholarship pages.
+    Stub: returns placeholder. Enhance with Google Custom Search or similar later.
+    """
+    return {
+        "query": query,
+        "status": "stub",
+        "message": "Web search not configured. Add API key and HTTP client to enable.",
+        "results": [],
+    }
+
+
+@mcp.tool()
+def fetch_page_metadata(url: str) -> dict[str, Any]:
+    """
+    Pull title, meta description, and main headings from a scholarship link.
+    Stub: returns placeholder. Enhance with requests/beautifulsoup or similar later.
+    """
+    return {
+        "url": url,
+        "status": "stub",
+        "message": "Page fetch not configured. Add HTTP client to enable.",
+        "title": "",
+        "description": "",
+        "headings": [],
+    }
+
+
+@mcp.tool()
+def check_deadline_status(deadline: str, url: str = "") -> dict[str, Any]:
+    """
+    Given a deadline string or URL, return whether the deadline is in the future
+    and days remaining.
+    """
+    today = date.today()
+    days_remaining = None
+    is_future = None
+    parsed_date = None
+
+    if deadline:
+        try:
+            if isinstance(deadline, str):
+                parsed_date = datetime.fromisoformat(deadline.replace("Z", "+00:00")).date()
+            elif hasattr(deadline, "isoformat"):
+                parsed_date = deadline
+            if parsed_date:
+                delta = parsed_date - today
+                days_remaining = delta.days
+                is_future = days_remaining > 0
+        except Exception:
+            pass
+
+    return {
+        "deadline": str(deadline) if deadline else "",
+        "url": url or "",
+        "is_future": is_future if is_future is not None else "unknown",
+        "days_remaining": days_remaining,
+        "parsed_date": str(parsed_date) if parsed_date else None,
+    }
 
 
 if __name__ == "__main__":
