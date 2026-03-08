@@ -58,3 +58,4 @@ zstandard==0.25.0
 google-adk
 google-generativeai>=0.8.0
 playwright
+backboard-sdk

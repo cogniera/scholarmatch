@@ -1,8 +1,16 @@
 from typing import Optional, Dict, Any, List
 import json
 import os
+import asyncio
 
 from app.services.ai_search import run_ai_loop
+
+
+BACKBOARD_API_KEY = os.getenv("BACKBOARD_API_KEY")
+BACKBOARD_ASSISTANT_ID = os.getenv("BACKBOARD_ASSISTANT_ID")
+BACKBOARD_ENABLED = bool(BACKBOARD_API_KEY and BACKBOARD_ASSISTANT_ID)
+_backboard_client = None
+_backboard_threads: Dict[str, str] = {}
 
 
 def _get_chat_model():
@@ -169,6 +177,109 @@ def _fallback_chat(question: str, scholarships_summary: Optional[List[dict]] = N
     return {"response": response, "organize": organize}
 
 
+def _get_backboard_client():
+    global _backboard_client
+    if not BACKBOARD_ENABLED:
+        return None
+    if _backboard_client is not None:
+        return _backboard_client
+    try:
+        from backboard import BackboardClient  # type: ignore[import]
+    except Exception:
+        return None
+    _backboard_client = BackboardClient(api_key=BACKBOARD_API_KEY)
+    return _backboard_client
+
+
+async def _backboard_chat_async(
+    question: str,
+    user: dict,
+    scholarships_summary: Optional[List[dict]] = None,
+) -> Dict[str, Any]:
+    """
+    Use Backboard threads + memory for the right-side dashboard chatbot only.
+
+    Each user id maps to a Backboard thread so memory persists across messages
+    and sessions (for as long as this process is running).
+    """
+    client = _get_backboard_client()
+    if client is None:
+        return _fallback_chat(question, scholarships_summary)
+
+    user_id = str(user.get("id") or user.get("auth0_sub") or "anonymous")
+    thread_id = _backboard_threads.get(user_id)
+    if not thread_id:
+        thread = await client.create_thread(BACKBOARD_ASSISTANT_ID)
+        thread_id = thread.thread_id
+        _backboard_threads[user_id] = thread_id
+
+    # Build content with scholarships summary so the assistant can reference them.
+    content_parts = [f"User question: {question}"]
+    if scholarships_summary:
+        content_parts.append(
+            "Current scholarships on the dashboard (JSON summary): "
+            + json.dumps(scholarships_summary[:30], default=str)
+        )
+
+    # Include lightweight instructions so Backboard knows about ORGANIZE_JSON.
+    instructions = (
+        "You are the ScholarMatch dashboard assistant. You help students with "
+        "their scholarships and can also instruct the UI to change how "
+        "scholarships are displayed.\n\n"
+        "When the user wants to change how scholarships are displayed "
+        "(sorting or filtering), append a line with:\n\n"
+        "ORGANIZE_JSON:\n"
+        '{"sortBy":"deadline"|"amount"|"matchScore","order":"asc"|"desc",'
+        '"filterMinAmount":number|null,"filterMinMatch":number|null}\n\n'
+        "Examples: \"sort by deadline\" -> {\"sortBy\":\"deadline\",\"order\":\"asc\"}; "
+        "\"highest amount\" -> {\"sortBy\":\"amount\",\"order\":\"desc\"}; "
+        "\"only $5000+\" -> {\"filterMinAmount\":5000}.\n\n"
+        "Otherwise, do not include ORGANIZE_JSON and just answer naturally."
+    )
+
+    full_content = instructions + "\n\n" + "\n".join(content_parts)
+
+    response = await client.add_message(
+        thread_id=thread_id,
+        content=full_content,
+        memory="Auto",  # enable Backboard memory
+        stream=False,
+    )
+
+    text = (getattr(response, "content", "") or "").strip()
+    if not text:
+        return _fallback_chat(question, scholarships_summary)
+
+    organize = None
+    if "ORGANIZE_JSON:" in text:
+        try:
+            base, after = text.split("ORGANIZE_JSON:", 1)
+            json_part = after.strip()
+            end = json_part.find("\n")
+            if end > 0:
+                json_part = json_part[:end]
+            parsed = json.loads(json_part)
+            allowed = {"sortBy", "order", "filterMinAmount", "filterMinMatch"}
+            organize = {k: v for k, v in parsed.items() if k in allowed and v is not None}
+            text = base.strip()
+        except Exception:
+            pass
+
+    return {"response": text or "I couldn't generate a response. Please try again.", "organize": organize}
+
+
+def _backboard_chat(
+    question: str,
+    user: dict,
+    scholarships_summary: Optional[List[dict]] = None,
+) -> Dict[str, Any]:
+    """
+    Synchronous wrapper for Backboard chat so it can be called from
+    regular FastAPI (threadpool) endpoints.
+    """
+    return asyncio.run(_backboard_chat_async(question, user, scholarships_summary))
+
+
 def application_chat(
     question: str,
     user: dict,
@@ -178,8 +289,19 @@ def application_chat(
 ) -> Dict[str, Any]:
     """
     AI-powered scholarship assistant. Returns { response, organize? }.
-    Uses keyword fallback when Gemini is unavailable so chat always works.
+    Uses (in priority order):
+      1. Backboard memory chat if BACKBOARD_* env vars are configured
+      2. Gemini model if GOOGLE_API_KEY / GEMINI_API_KEY is configured
+      3. Keyword-based fallback so chat always works
     """
+    # 1) Backboard with persistent memory across sessions (chatbot only).
+    if BACKBOARD_ENABLED:
+        try:
+            return _backboard_chat(question, user, scholarships_summary)
+        except Exception:
+            # If Backboard fails for any reason, fall through to Gemini / fallback.
+            pass
+
     # Try Gemini first if available
     model = _get_chat_model()
     if model:
