@@ -3,7 +3,28 @@ import { Search, SlidersHorizontal, Wand2, LoaderCircle } from 'lucide-react';
 import ScholarshipCard from '../../components/scholarships/ScholarshipCard';
 import ScholarshipModal from '../../components/scholarships/ScholarshipModal';
 import Modal from '../../components/shared/Modal';
+import { useApp } from '../../context/AppContext';
 import { fetchMatches } from '../../services/api';
+
+function applyOrganize(list, organize) {
+  if (!organize || !Array.isArray(list) || list.length === 0) return list;
+  let result = [...list];
+  if (organize.filterMinAmount != null && Number.isFinite(organize.filterMinAmount)) {
+    result = result.filter((s) => (s.amount ?? 0) >= organize.filterMinAmount);
+  }
+  if (organize.filterMinMatch != null && Number.isFinite(organize.filterMinMatch)) {
+    result = result.filter((s) => (s.matchScore ?? 0) >= organize.filterMinMatch);
+  }
+  const order = organize.order === 'asc' ? 1 : -1;
+  if (organize.sortBy === 'deadline') {
+    result.sort((a, b) => order * (new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31')));
+  } else if (organize.sortBy === 'amount') {
+    result.sort((a, b) => order * ((a.amount ?? 0) - (b.amount ?? 0)));
+  } else if (organize.sortBy === 'matchScore') {
+    result.sort((a, b) => order * ((a.matchScore ?? 0) - (b.matchScore ?? 0)));
+  }
+  return result;
+}
 
 const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
@@ -38,6 +59,7 @@ function normalizeMatchForUi(match, index) {
 }
 
 export default function ScholarshipsPage() {
+  const { state, dispatch } = useApp();
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [minMatch, setMinMatch] = useState(0);
@@ -68,6 +90,7 @@ export default function ScholarshipsPage() {
 
         if (active) {
           setMatches(normalized);
+          dispatch({ type: 'SET_SCHOLARSHIPS_FOR_CHAT', payload: normalized });
         }
       } catch {
         if (active) {
@@ -106,16 +129,21 @@ export default function ScholarshipsPage() {
   };
 
   const filtered = useMemo(() => {
+    const effectiveMinMatch = state.chatOrganize?.filterMinMatch ?? minMatch;
     let list = [...matches]
-      .filter(s => s.matchScore >= minMatch)
+      .filter(s => s.matchScore >= effectiveMinMatch)
       .filter(s => search === '' || (s.name || '').toLowerCase().includes(search.toLowerCase()) || (s.organization || '').toLowerCase().includes(search.toLowerCase()));
 
-    if (sortBy === 'match') list.sort((a, b) => b.matchScore - a.matchScore);
-    else if (sortBy === 'amount') list.sort((a, b) => b.amount - a.amount);
-    else if (sortBy === 'deadline') list.sort((a, b) => new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31'));
+    if (state.chatOrganize && Object.keys(state.chatOrganize).length > 0) {
+      list = applyOrganize(list, state.chatOrganize);
+    } else {
+      if (sortBy === 'match') list.sort((a, b) => b.matchScore - a.matchScore);
+      else if (sortBy === 'amount') list.sort((a, b) => b.amount - a.amount);
+      else if (sortBy === 'deadline') list.sort((a, b) => new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31'));
+    }
 
     return list;
-  }, [matches, search, minMatch, sortBy]);
+  }, [matches, search, minMatch, sortBy, state.chatOrganize]);
 
   return (
     <div className="animate-fade-in max-w-6xl space-y-6">

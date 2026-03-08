@@ -5,6 +5,26 @@ import StatCard from '../../components/shared/StatCard';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchMatches, fetchProfile, fetchDashboardStats, fetchUpcomingDeadlines } from '../../services/api';
 
+function applyOrganize(list, organize) {
+  if (!organize || !Array.isArray(list) || list.length === 0) return list;
+  let result = [...list];
+  if (organize.filterMinAmount != null && Number.isFinite(organize.filterMinAmount)) {
+    result = result.filter((s) => (s.amount ?? 0) >= organize.filterMinAmount);
+  }
+  if (organize.filterMinMatch != null && Number.isFinite(organize.filterMinMatch)) {
+    result = result.filter((s) => (s.matchScore ?? 0) >= organize.filterMinMatch);
+  }
+  const order = organize.order === 'asc' ? 1 : -1;
+  if (organize.sortBy === 'deadline') {
+    result.sort((a, b) => order * (new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31')));
+  } else if (organize.sortBy === 'amount') {
+    result.sort((a, b) => order * ((a.amount ?? 0) - (b.amount ?? 0)));
+  } else if (organize.sortBy === 'matchScore') {
+    result.sort((a, b) => order * ((a.matchScore ?? 0) - (b.matchScore ?? 0)));
+  }
+  return result;
+}
+
 const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
 function normalizeMatch(match, index) {
@@ -34,7 +54,7 @@ function isValidDate(value) {
 
 export default function DashboardHome() {
   const navigate = useNavigate();
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const [backendProfile, setBackendProfile] = useState(null);
   const [backendMatches, setBackendMatches] = useState([]);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
@@ -71,8 +91,10 @@ export default function DashboardHome() {
         if (!active) return;
 
         const rawMatches = Array.isArray(matchesResponse?.matches) ? matchesResponse.matches : [];
+        const normalized = rawMatches.map((match, index) => normalizeMatch(match, index));
         setBackendProfile(profile || null);
-        setBackendMatches(rawMatches.map((match, index) => normalizeMatch(match, index)));
+        setBackendMatches(normalized);
+        dispatch({ type: 'SET_SCHOLARSHIPS_FOR_CHAT', payload: normalized });
         setStats(statsRes || null);
         setDeadlines(Array.isArray(deadlinesRes?.deadlines) ? deadlinesRes.deadlines : []);
       } catch {
@@ -95,10 +117,11 @@ export default function DashboardHome() {
     };
   }, []);
 
-  const topMatches = useMemo(
-    () => [...backendMatches].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0)).slice(0, 3),
-    [backendMatches],
-  );
+  const topMatches = useMemo(() => {
+    const base = [...backendMatches].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+    const organized = state.chatOrganize ? applyOrganize(base, state.chatOrganize) : base;
+    return organized.slice(0, 3);
+  }, [backendMatches, state.chatOrganize]);
 
   const topMatchCards = useMemo(() => {
     const cards = [...topMatches];

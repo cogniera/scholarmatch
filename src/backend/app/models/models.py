@@ -89,3 +89,4 @@ class ChatRequest(BaseModel):
     question: str
     scholarship_id: Optional[int] = None   # Provide context about a specific scholarship
     include_profile: bool = True            # Inject student profile into context
+    scholarships_summary: Optional[list[dict]] = None  # For organize instructions (id, title, amount, deadline, match_score)

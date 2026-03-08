@@ -235,16 +235,27 @@ export async function generateRoadmap(userId, token = null) {
  * @param {string} userId - Profile id persisted in local storage
  * @param {string} question
  * @param {number|null} scholarshipId - optional scholarship context
+ * @param {Array<{id, title, amount, deadline, match_score}>} scholarshipsSummary - optional list for organize
  */
-export async function sendChatMessage(userId, question, scholarshipId = null, token = null) {
+export async function sendChatMessage(userId, question, scholarshipId = null, scholarshipsSummary = null, token = null) {
+  const body = {
+    question,
+    scholarship_id: scholarshipId,
+    include_profile: true,
+  };
+  if (Array.isArray(scholarshipsSummary) && scholarshipsSummary.length > 0) {
+    body.scholarships_summary = scholarshipsSummary.map(s => ({
+      id: String(s.id),
+      title: s.name || s.title || '',
+      amount: s.amount ?? null,
+      deadline: s.deadline ?? null,
+      match_score: s.matchScore ?? null,
+    }));
+  }
   const res = await fetch(`${BASE_URL}/chat`, {
     method: 'POST',
     headers: buildAuthHeaders({ token, userId, includeJson: true }),
-    body: JSON.stringify({
-      question,
-      scholarship_id: scholarshipId,
-      include_profile: true,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) throw new Error('Failed to send message');
