@@ -40,8 +40,8 @@ export default function CreateProfilePage() {
       window.localStorage.setItem(LOCAL_USER_ID_KEY, profile.id);
 
       setSubmitChecks(checks || []);
-      setSubmitSuccess('Profile saved. Taking you to your dashboard...');
-      setTimeout(() => navigate('/dashboard/home'), 400);
+      setSubmitSuccess('Profile saved. Taking you to your recommendations...');
+      setTimeout(() => navigate('/first-time-recommendations'), 400);
     } catch (error) {
       setSubmitError(error.message || 'Failed to save profile. Please try again.');
       setSubmitChecks(Array.isArray(error.checks) ? error.checks : []);

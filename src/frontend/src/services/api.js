@@ -152,6 +152,20 @@ export async function updateProfile(userId, profileData, token = null) {
 }
 
 /**
+ * Fetch current user's profile from backend.
+ *
+ * @param {string} userId - Profile id persisted in local storage
+ */
+export async function fetchProfile(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/profile`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch profile');
+  return res.json();
+}
+
+/**
  * Fetch matched scholarships for the current user.
  * Set explain=true to include AI explanations (slower).
  *

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import CreateProfilePage from './pages/CreateProfilePage';
+import FirstTimeRecommendationsPage from './pages/FirstTimeRecommendationsPage';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import ScholarshipsPage from './pages/dashboard/ScholarshipsPage';
@@ -13,6 +14,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/create-profile" element={<CreateProfilePage />} />
+      <Route path="/first-time-recommendations" element={<FirstTimeRecommendationsPage />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<DashboardHome />} />
