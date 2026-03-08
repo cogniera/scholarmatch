@@ -5,21 +5,24 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from main import process_webpages
 
-# Hardcoded scholarship URLs to scrape
+# Hardcoded scholarship URLs to scrape — selected for having explicit dollar amounts
 SCHOLARSHIP_URLS = [
-    # External Foundations
+    # External Foundations (good amount data)
     "https://www.horatioalger.ca/en/scholarships/",
     "https://www.rbc.com/dms/enterprise/scholarships.html",
-    "https://indspire.ca/programs/students/bursaries-scholarships/",
     "https://loranscholar.ca/the-program/",
-    
-    # Accessible Universities
+
+    # Aggregator with many dollar amounts
+    "https://studentawards.com/scholarships/",
+
+    # Universities with rich scholarship data
+    "https://uwaterloo.ca/future-students/financing/scholarships",
     "https://mcgill.ca/studentaid/scholarships-aid/future-undergrads/entrance-scholarships",
+    "https://future.utoronto.ca/finances/scholarships/",
+    "https://www.torontomu.ca/admissions/scholarships-awards/",
     "https://www.concordia.ca/students/financial/scholarships-funding/bursaries.html",
-    "https://www.ucalgary.ca/registrar/finances/awards-scholarships-and-bursaries/entrance",
     "https://www.dal.ca/admissions/money_matters/awards-financial-aid/scholarships.html",
     "https://carleton.ca/awards/scholarships/",
-    "https://www.uottawa.ca/study/undergraduate-studies/financing-studies/scholarships"
 ]
 
 HEADERS = {
