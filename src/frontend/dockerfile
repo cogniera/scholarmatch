@@ -16,16 +16,20 @@ RUN npm install && npm audit fix --force
 COPY . .
 
 # Expose Vite's default port
-EXPOSE 80
+EXPOSE 5173
 
 # Keep the dev server running, making it accessible externally
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "80"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
 
 # ==========================================
 # 2. BUILD STAGE
 # ==========================================
 # This stage builds the static assets for production.
 FROM node:20-alpine AS builder
+
+# Vite reads env vars at build time, so pass API URL through build args.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
 WORKDIR /app
 

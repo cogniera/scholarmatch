@@ -26,7 +26,7 @@ services:
       target: development # explicitly target the dev stage of the multi-stage Dockerfile
     container_name: scholarmatch-frontend
     ports:
-      - "80:80"
+      - "5173:5173"
     env_file:
       - ./src/frontend/.env_file
     # docker compose watch configuration
