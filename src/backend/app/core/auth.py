@@ -1,82 +1,40 @@
 """
-auth.py — Auth0 JWT verification for FastAPI
-Validates Bearer tokens issued by Auth0 on every protected route.
+core/auth.py
+
+Lightweight identity helpers for local no-auth mode.
 """
 
-import os
-import httpx
-from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, JWTError
-from functools import lru_cache
-
-AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
-AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE")
-ALGORITHMS = ["RS256"]
-
-security = HTTPBearer()
+from typing import Optional
+from fastapi import Header, HTTPException, status
 
 
-@lru_cache(maxsize=1)
-def get_jwks() -> dict:
-    """Fetch Auth0 public keys (cached so we only hit Auth0 once per process)."""
-    url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-    response = httpx.get(url, timeout=10)
-    response.raise_for_status()
-    return response.json()
-
-
-def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
+def verify_token(authorization: Optional[str] = Header(default=None)) -> dict:
     """
-    Dependency — validates the JWT and returns the decoded payload.
-    
-    Usage:
-        @app.get("/protected")
-        def protected_route(user: dict = Depends(verify_token)):
-            return {"user_id": user["sub"]}
+    Legacy-compatible stub used by older imports.
+
+    In no-auth mode we don't validate JWTs, but we still return a shape
+    that includes a user subject when available.
     """
-    token = credentials.credentials
+    x_user_id = None
+    if authorization and authorization.lower().startswith('bearer '):
+        x_user_id = authorization.split(' ', 1)[1].strip() or None
 
-    try:
-        jwks = get_jwks()
-
-        # Decode header to find the right key
-        unverified_header = jwt.get_unverified_header(token)
-
-        rsa_key = {}
-        for key in jwks["keys"]:
-            if key["kid"] == unverified_header["kid"]:
-                rsa_key = {
-                    "kty": key["kty"],
-                    "kid": key["kid"],
-                    "use": key["use"],
-                    "n":   key["n"],
-                    "e":   key["e"],
-                }
-                break
-
-        if not rsa_key:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unable to find matching public key",
-            )
-
-        payload = jwt.decode(
-            token,
-            rsa_key,
-            algorithms=ALGORITHMS,
-            audience=AUTH0_AUDIENCE,
-            issuer=f"https://{AUTH0_DOMAIN}/",
-        )
-        return payload
-
-    except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {str(e)}",
-        )
+    return {'sub': x_user_id}
 
 
-def get_user_id(user: dict = Depends(verify_token)) -> str:
-    """Convenience dependency — returns just the Auth0 user ID (sub claim)."""
-    return user["sub"]
+def get_user_id(
+    x_user_id: Optional[str] = Header(default=None, alias='X-User-Id'),
+) -> str:
+    """
+    Read user identity from X-User-Id header.
+
+    Frontend stores this id after profile creation and sends it on
+    profile-dependent endpoints (uploads, matches, updates).
+    """
+    if x_user_id and x_user_id.strip():
+        return x_user_id.strip()
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Missing X-User-Id header. Create a profile first.',
+    )

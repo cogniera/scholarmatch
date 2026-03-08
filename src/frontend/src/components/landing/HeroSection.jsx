@@ -1,16 +1,12 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import NetworkCanvas from './NetworkCanvas';
 
-export default function HeroSection() {
-  const { loginWithRedirect, isAuthenticated } = useAuth0();
+const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
+export default function HeroSection() {
   const handleGetStarted = () => {
-    if (isAuthenticated) {
-      window.location.href = '/create-profile';
-    } else {
-      loginWithRedirect();
-    }
+    window.localStorage.removeItem(LOCAL_USER_ID_KEY);
+    window.location.href = '/create-profile';
   };
 
   return (

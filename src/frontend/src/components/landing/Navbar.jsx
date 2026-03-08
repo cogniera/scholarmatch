@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { GraduationCap, Menu, X } from 'lucide-react';
-import { useAuth0 } from '@auth0/auth0-react';
+
+const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -14,11 +14,8 @@ export default function Navbar() {
   }, []);
 
   const handleGetStarted = () => {
-    if (isAuthenticated) {
-      window.location.href = '/create-profile';
-    } else {
-      loginWithRedirect();
-    }
+    window.localStorage.removeItem(LOCAL_USER_ID_KEY);
+    window.location.href = '/create-profile';
     setMobileOpen(false);
   };
 
@@ -40,18 +37,9 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           <a href="#about" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">About Us</a>
           <a href="#contact" className="text-sm font-medium text-brand-muted hover:text-brand-text transition-colors">Contact Us</a>
-          {isAuthenticated ? (
-            <button
-              onClick={() => logout(  { logoutParams: { returnTo: window.location.origin } })}
-              className="btn-ghost text-sm"
-            >
-              Log Out
-            </button>
-          ) : (
-            <button onClick={handleGetStarted} className="btn-primary text-sm">
-              Get Started
-            </button>
-          )}
+          <button onClick={handleGetStarted} className="btn-primary text-sm">
+            Get Started
+          </button>
         </div>
 
         {/* Mobile Hamburger */}
