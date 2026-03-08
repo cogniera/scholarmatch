@@ -31,7 +31,7 @@ export default function ScholarshipCard({ scholarship, onViewDetails }) {
 
         {/* Card Body */}
         <div className="flex items-start gap-4 mb-4">
-          <img src={scholarship.logoUrl} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
+          <img src={scholarship.logoUrl || scholarship.logo_url} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
           <div className="flex-1 min-w-0 pr-4">
             <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name}</h3>
             <p className="text-sm text-brand-muted">{scholarship.organization}</p>

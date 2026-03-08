@@ -38,7 +38,7 @@ export default function ScholarshipModal({ scholarship, onClose }) {
           />
         </div>
       ) : (
-        <img src={scholarship.bannerUrl} alt={scholarship.name} className="w-full h-48 md:h-56 object-cover rounded-xl mb-6 shadow-sm border border-brand-border/50" />
+        <img src={scholarship.bannerUrl || scholarship.image_url} alt={scholarship.name} className="w-full h-48 md:h-56 object-cover rounded-xl mb-6 shadow-sm border border-brand-border/50" />
       )}
 
       {/* Title + Amount */}
