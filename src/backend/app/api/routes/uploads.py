@@ -76,15 +76,17 @@ def chat(
         if s_result.data:
             scholarship = s_result.data[0]
 
-    response_text = application_chat(
+    result = application_chat(
         question=body.question,
         user=user,
         scholarship=scholarship,
+        scholarships_summary=body.scholarships_summary,
     )
 
     return {
         "question": body.question,
-        "response": response_text,
+        "response": result.get("response", ""),
+        "organize": result.get("organize"),
         "context_used": {
             "profile": True,
             "scholarship": scholarship.get("title") if scholarship else None,

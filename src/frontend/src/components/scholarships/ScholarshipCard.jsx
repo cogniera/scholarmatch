@@ -5,6 +5,13 @@ import MatchScoreBadge from './MatchScoreBadge';
 export default function ScholarshipCard({ scholarship, onViewDetails }) {
   const { state, dispatch } = useApp();
   const isSaved = state.savedScholarships.includes(scholarship.id);
+  const tags = Array.isArray(scholarship.tags) ? scholarship.tags : [];
+  const amountLabel = Number.isFinite(Number(scholarship.amount))
+    ? `$${Number(scholarship.amount).toLocaleString()}`
+    : '!';
+  const dueLabel = scholarship.deadline
+    ? new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '!';
 
   const toggleSave = (e) => {
     e.stopPropagation();
@@ -33,25 +40,28 @@ export default function ScholarshipCard({ scholarship, onViewDetails }) {
         <div className="flex items-start gap-4 mb-4">
           <img src={scholarship.logoUrl || scholarship.logo_url} alt={scholarship.organization} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
           <div className="flex-1 min-w-0 pr-4">
-            <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name}</h3>
-            <p className="text-sm text-brand-muted">{scholarship.organization}</p>
+            <h3 className="text-lg font-display font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1">{scholarship.name || '!'}</h3>
+            <p className="text-sm text-brand-muted">{scholarship.organization || '!'}</p>
           </div>
         </div>
       </div>
 
       {/* Bottom Section: Categories & Footer strictly aligned */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {scholarship.tags.slice(0, 3).map(tag => (
+        {tags.slice(0, 3).map(tag => (
           <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-brand-bg border border-brand-border text-brand-muted font-medium">{tag}</span>
         ))}
+        {tags.length === 0 && (
+          <span className="text-xs px-2.5 py-1 rounded-full bg-brand-bg border border-brand-border text-brand-muted font-medium">!</span>
+        )}
       </div>
 
       <div className="flex items-center justify-between pt-4 border-t border-brand-border/50">
         <span className="text-xl font-display font-bold text-brand-accent">
-          ${scholarship.amount.toLocaleString()}
+          {amountLabel}
         </span>
         <span className="text-sm font-medium text-brand-muted bg-brand-bg px-3 py-1 rounded-md">
-          Due: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          Due: {dueLabel}
         </span>
       </div>
     </div>

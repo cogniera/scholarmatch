@@ -18,6 +18,8 @@ class ProfileCreate(BaseModel):
     academic_level: str  # High School | Undergraduate | Graduate | PhD
     financial_need: bool = False
     extracurriculars: Optional[str] = None
+    career_interests: Optional[str] = None
+    university: Optional[str] = None
 
 
 class ProfileUpdate(BaseModel):
@@ -30,6 +32,8 @@ class ProfileUpdate(BaseModel):
     extracurriculars: Optional[str] = None
     resume_url: Optional[str] = None
     transcript_url: Optional[str] = None
+    career_interests: Optional[str] = None
+    university: Optional[str] = None
 
 
 class ProfileResponse(BaseModel):
@@ -44,6 +48,9 @@ class ProfileResponse(BaseModel):
     extracurriculars: Optional[str]
     resume_url: Optional[str]
     transcript_url: Optional[str]
+    career_interests: Optional[str] = None
+    university: Optional[str] = None
+    profile_strength: Optional[int] = None
 
 
 # ── Scholarships ──────────────────────────────────────────────────────────────
@@ -82,3 +89,4 @@ class ChatRequest(BaseModel):
     question: str
     scholarship_id: Optional[int] = None   # Provide context about a specific scholarship
     include_profile: bool = True            # Inject student profile into context
+    scholarships_summary: Optional[list[dict]] = None  # For organize instructions (id, title, amount, deadline, match_score)

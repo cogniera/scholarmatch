@@ -2,27 +2,53 @@
  * api.js — All backend API calls in one place
  *
  * Every function here talks to your FastAPI backend.
- * The Auth0 token is passed in so protected routes work.
+ * Uses either bearer token auth (legacy) or X-User-Id (no-auth mode).
  */
 
 import { transformScholarshipList, transformMatchedScholarships } from './scholarshipTransformer';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+function parseChecksHeader(headerValue) {
+  if (!headerValue) return [];
+
+  try {
+    const parsed = JSON.parse(headerValue);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Save Cloudinary URLs to the backend (Supabase).
  * Called after a successful Cloudinary upload.
  *
- * @param {string} token - Auth0 access token
+ * @param {string} userId - Profile id persisted in local storage
  * @param {{ resume_url?: string, transcript_url?: string }} urls
  */
-export async function saveUploadUrls(token, urls) {
+function buildAuthHeaders({ token, userId, includeJson = false } = {}) {
+  const headers = {};
+
+  if (includeJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (userId) {
+    headers['X-User-Id'] = userId;
+  }
+
+  return headers;
+}
+
+export async function saveUploadUrls(userId, urls, token = null) {
   const res = await fetch(`${BASE_URL}/upload`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: buildAuthHeaders({ token, userId, includeJson: true }),
     body: JSON.stringify(urls),
   });
 
@@ -35,63 +61,110 @@ export async function saveUploadUrls(token, urls) {
 }
 
 /**
- * Fetch the current user's profile from the backend.
- * Used to rehydrate state after page refresh.
+ * Create a new user profile on the backend.
  *
- * @param {string} token - Auth0 access token
+ * @param {object} profileData - Profile data to create
+ * @param {string|null} userId - Optional existing user id for idempotent retries
  */
-export async function fetchProfile(token) {
+export async function createProfile(profileData, userId = null) {
   const res = await fetch(`${BASE_URL}/profile`, {
-    headers: { Authorization: `Bearer ${token}` },
+    method: 'POST',
+    headers: buildAuthHeaders({ userId, includeJson: true }),
+    body: JSON.stringify(profileData),
   });
 
-  if (res.status === 404) return null; // Profile doesn't exist yet
-  if (!res.ok) throw new Error('Failed to fetch profile');
-  return res.json();
+  const backendChecks = parseChecksHeader(res.headers.get('x-profile-checks'));
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const detail = err?.detail;
+    const message = typeof detail === 'string'
+      ? detail
+      : detail?.message || 'Failed to create profile';
+
+    const apiError = new Error(message);
+    apiError.status = res.status;
+    apiError.checks = Array.isArray(detail?.checks) ? detail.checks : backendChecks;
+    throw apiError;
+  }
+
+  const profile = await res.json();
+
+  // Treat malformed success payloads as failure so UI does not navigate forward.
+  if (!profile || typeof profile !== 'object' || !profile.id) {
+    const apiError = new Error('Profile was not saved correctly. Please try again.');
+    apiError.status = 500;
+    apiError.checks = backendChecks;
+    throw apiError;
+  }
+
+  return { profile, checks: backendChecks };
 }
 
 /**
- * Create a new student profile.
+ * Create profile first; if it already exists for this user id, update it.
  *
- * @param {string} token - Auth0 access token
- * @param {object} profileData
+ * @param {object} profileData - Profile data to create or update
+ * @param {string|null} userId - Existing user id from local storage
  */
-export async function createProfile(token, profileData) {
+export async function createOrUpdateProfile(profileData, userId = null) {
+  try {
+    const created = await createProfile(profileData, userId);
+    return { ...created, mode: 'create' };
+  } catch (error) {
+    const isAlreadyExists = error?.status === 409 && Boolean(userId);
+    if (!isAlreadyExists) {
+      throw error;
+    }
+
+    const profile = await updateProfile(userId, profileData);
+    const checks = [
+      ...(Array.isArray(error.checks) ? error.checks : []),
+      {
+        layer: 'frontend',
+        step: 'existing_profile_fallback',
+        status: 'ok',
+        message: 'Profile exists. Applied PATCH /profile update instead.',
+      },
+    ];
+
+    return { profile, checks, mode: 'update' };
+  }
+}
+
+/**
+ * Update the current user's profile on the backend.
+ *
+ * @param {string} userId - Profile id persisted in local storage
+ * @param {object} profileData - Profile data to update
+ */
+export async function updateProfile(userId, profileData, token = null) {
   const res = await fetch(`${BASE_URL}/profile`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    method: 'PATCH',
+    headers: buildAuthHeaders({ token, userId, includeJson: true }),
     body: JSON.stringify(profileData),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || 'Failed to create profile');
+    throw new Error(err.detail || 'Failed to update profile');
   }
 
   return res.json();
 }
 
 /**
- * Fetch all scholarships from the public endpoint (no auth needed).
- * Returns frontend-shaped scholarship objects.
+ * Fetch current user's profile from backend.
  *
- * @param {object} [filters] - Optional filters { location, program, limit }
+ * @param {string} userId - Profile id persisted in local storage
  */
-export async function fetchScholarships(filters = {}) {
-  const params = new URLSearchParams();
-  if (filters.location) params.set('location', filters.location);
-  if (filters.program) params.set('program', filters.program);
-  if (filters.limit) params.set('limit', String(filters.limit));
+export async function fetchProfile(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/profile`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
 
-  const qs = params.toString();
-  const res = await fetch(`${BASE_URL}/scholarships${qs ? '?' + qs : ''}`);
-
-  if (!res.ok) throw new Error('Failed to fetch scholarships');
-  const rawList = await res.json();
-  return transformScholarshipList(rawList);
+  if (!res.ok) throw new Error('Failed to fetch profile');
+  return res.json();
 }
 
 /**
@@ -99,12 +172,12 @@ export async function fetchScholarships(filters = {}) {
  * Set explain=true to include AI explanations (slower).
  * Returns frontend-shaped scholarship objects with match scores.
  *
- * @param {string} token - Auth0 access token
+ * @param {string} userId - Profile id persisted in local storage
  * @param {boolean} explain - include Gemini AI explanations
  */
-export async function fetchMatches(token, explain = false) {
+export async function fetchMatches(userId, explain = false, token = null) {
   const res = await fetch(`${BASE_URL}/scholarships/match?explain=${explain}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: buildAuthHeaders({ token, userId }),
   });
 
   if (!res.ok) throw new Error('Failed to fetch matches');
@@ -113,24 +186,80 @@ export async function fetchMatches(token, explain = false) {
 }
 
 /**
+ * Fetch results of a previous recommendation run.
+ *
+ * @param {string} userId - Profile id
+ * @param {string} runId - Match run id from fetchMatches response
+ */
+export async function fetchMatchRun(userId, runId, token = null) {
+  const res = await fetch(`${BASE_URL}/scholarships/match-runs/${runId}`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch match run');
+  return res.json();
+}
+
+export async function fetchDashboardStats(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/dashboard/stats`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+  return res.json();
+}
+
+export async function fetchUpcomingDeadlines(userId, limit = 5, token = null) {
+  const res = await fetch(`${BASE_URL}/dashboard/upcoming-deadlines?limit=${limit}`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch deadlines');
+  return res.json();
+}
+
+export async function fetchRoadmap(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/roadmap`, {
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to fetch roadmap');
+  return res.json();
+}
+
+export async function generateRoadmap(userId, token = null) {
+  const res = await fetch(`${BASE_URL}/roadmap/generate`, {
+    method: 'POST',
+    headers: buildAuthHeaders({ token, userId }),
+  });
+  if (!res.ok) throw new Error('Failed to generate roadmap');
+  return res.json();
+}
+
+/**
  * Send a chat message to the AI assistant.
  *
- * @param {string} token - Auth0 access token
+ * @param {string} userId - Profile id persisted in local storage
  * @param {string} question
  * @param {number|null} scholarshipId - optional scholarship context
+ * @param {Array<{id, title, amount, deadline, match_score}>} scholarshipsSummary - optional list for organize
  */
-export async function sendChatMessage(token, question, scholarshipId = null) {
+export async function sendChatMessage(userId, question, scholarshipId = null, scholarshipsSummary = null, token = null) {
+  const body = {
+    question,
+    scholarship_id: scholarshipId,
+    include_profile: true,
+  };
+  if (Array.isArray(scholarshipsSummary) && scholarshipsSummary.length > 0) {
+    body.scholarships_summary = scholarshipsSummary.map(s => ({
+      id: String(s.id),
+      title: s.name || s.title || '',
+      amount: s.amount ?? null,
+      deadline: s.deadline ?? null,
+      match_score: s.matchScore ?? null,
+    }));
+  }
   const res = await fetch(`${BASE_URL}/chat`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      question,
-      scholarship_id: scholarshipId,
-      include_profile: true,
-    }),
+    headers: buildAuthHeaders({ token, userId, includeJson: true }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) throw new Error('Failed to send message');

@@ -1,28 +1,149 @@
-import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, SlidersHorizontal, Wand2, LoaderCircle } from 'lucide-react';
 import ScholarshipCard from '../../components/scholarships/ScholarshipCard';
 import ScholarshipModal from '../../components/scholarships/ScholarshipModal';
 import Modal from '../../components/shared/Modal';
+import { useApp } from '../../context/AppContext';
+import { fetchMatches } from '../../services/api';
+
+function applyOrganize(list, organize) {
+  if (!organize || !Array.isArray(list) || list.length === 0) return list;
+  let result = [...list];
+  if (organize.filterMinAmount != null && Number.isFinite(organize.filterMinAmount)) {
+    result = result.filter((s) => (s.amount ?? 0) >= organize.filterMinAmount);
+  }
+  if (organize.filterMinMatch != null && Number.isFinite(organize.filterMinMatch)) {
+    result = result.filter((s) => (s.matchScore ?? 0) >= organize.filterMinMatch);
+  }
+  const order = organize.order === 'asc' ? 1 : -1;
+  if (organize.sortBy === 'deadline') {
+    result.sort((a, b) => order * (new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31')));
+  } else if (organize.sortBy === 'amount') {
+    result.sort((a, b) => order * ((a.amount ?? 0) - (b.amount ?? 0)));
+  } else if (organize.sortBy === 'matchScore') {
+    result.sort((a, b) => order * ((a.matchScore ?? 0) - (b.matchScore ?? 0)));
+  }
+  return result;
+}
+
+const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
+
+function normalizeMatchForUi(match, index) {
+  const scholarship = match?.scholarship || {};
+  const amount = Number(scholarship.amount);
+  const score = Number(match?.ai_match_score ?? match?.match_score);
+
+  return {
+    id: scholarship.id ?? `match-${index}`,
+    name: scholarship.title || '!',
+    organization: scholarship.provider || '!',
+    amount: Number.isFinite(amount) ? amount : 0,
+    currency: scholarship.currency || 'USD',
+    deadline: scholarship.deadline || null,
+    logoUrl: 'https://res.cloudinary.com/demo/image/upload/c_thumb,w_80,h_80,r_max/cld-sample-2',
+    bannerUrl: 'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_450,g_auto,f_auto/cld-sample-4',
+    videoUrl: null,
+    matchScore: Number.isFinite(score) ? Math.round(score) : 0,
+    tags: [scholarship.program, scholarship.academic_level, scholarship.location].filter(Boolean),
+    aiAnalysis: {
+      whyYouQualify: Array.isArray(match?.match_reasons) ? match.match_reasons : [],
+      aiExplanation: match?.ai_explanation || '',
+      eligibilityReason: match?.eligibility_reason || '',
+    },
+    scoreComponents: match?.score_components || null,
+    nextSteps: Array.isArray(match?.next_steps) ? match.next_steps : [],
+    overallRecommendation: match?.overall_recommendation || null,
+    applicationUrl: scholarship.link || '#',
+    requiredDocuments: [],
+  };
+}
 
 export default function ScholarshipsPage() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [minMatch, setMinMatch] = useState(0);
   const [sortBy, setSortBy] = useState('match');
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [loadingAi, setLoadingAi] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadMatches = async () => {
+      if (active) {
+        setLoading(true);
+        setLoadError('');
+      }
+
+      try {
+        const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
+        if (!userId) {
+          throw new Error('missing_user_id');
+        }
+
+        const response = await fetchMatches(userId, false);
+        const raw = Array.isArray(response?.matches) ? response.matches : [];
+        const normalized = raw.map((item, index) => normalizeMatchForUi(item, index));
+
+        if (active) {
+          setMatches(normalized);
+          dispatch({ type: 'SET_SCHOLARSHIPS_FOR_CHAT', payload: normalized });
+        }
+      } catch {
+        if (active) {
+          setMatches([]);
+          setLoadError('Unable to load scholarships from backend right now.');
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadMatches();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleRefineWithAi = async () => {
+    const userId = window.localStorage.getItem(LOCAL_USER_ID_KEY);
+    if (!userId || loadingAi) return;
+    setLoadingAi(true);
+    setLoadError('');
+    try {
+      const response = await fetchMatches(userId, true);
+      const raw = Array.isArray(response?.matches) ? response.matches : [];
+      const normalized = raw.map((item, index) => normalizeMatchForUi(item, index));
+      setMatches(normalized);
+    } catch {
+      setLoadError('AI refinement failed. Please try again.');
+    } finally {
+      setLoadingAi(false);
+    }
+  };
 
   const filtered = useMemo(() => {
-    let list = state.scholarships
-      .filter(s => s.matchScore >= minMatch)
-      .filter(s => search === '' || s.name.toLowerCase().includes(search.toLowerCase()) || s.organization.toLowerCase().includes(search.toLowerCase()));
+    const effectiveMinMatch = state.chatOrganize?.filterMinMatch ?? minMatch;
+    let list = [...matches]
+      .filter(s => s.matchScore >= effectiveMinMatch)
+      .filter(s => search === '' || (s.name || '').toLowerCase().includes(search.toLowerCase()) || (s.organization || '').toLowerCase().includes(search.toLowerCase()));
 
-    if (sortBy === 'match') list.sort((a, b) => b.matchScore - a.matchScore);
-    else if (sortBy === 'amount') list.sort((a, b) => b.amount - a.amount);
-    else if (sortBy === 'deadline') list.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+    if (state.chatOrganize && Object.keys(state.chatOrganize).length > 0) {
+      list = applyOrganize(list, state.chatOrganize);
+    } else {
+      if (sortBy === 'match') list.sort((a, b) => b.matchScore - a.matchScore);
+      else if (sortBy === 'amount') list.sort((a, b) => b.amount - a.amount);
+      else if (sortBy === 'deadline') list.sort((a, b) => new Date(a.deadline || '9999-12-31') - new Date(b.deadline || '9999-12-31'));
+    }
 
     return list;
-  }, [state.scholarships, search, minMatch, sortBy]);
+  }, [matches, search, minMatch, sortBy, state.chatOrganize]);
 
   return (
     <div className="animate-fade-in max-w-6xl space-y-6">
@@ -54,14 +175,33 @@ export default function ScholarshipsPage() {
             <option value={90}>90%+</option>
           </select>
         </div>
+        <button
+          type="button"
+          onClick={handleRefineWithAi}
+          disabled={loadingAi || matches.length === 0}
+          className="btn-primary text-sm py-2 px-4 disabled:opacity-60"
+        >
+          {loadingAi ? <LoaderCircle size={16} className="animate-spin" /> : <Wand2 size={16} />}
+          {loadingAi ? ' Refining with AI...' : ' Refine with AI'}
+        </button>
       </div>
+
+      {loadError && (
+        <p className="text-sm text-brand-warning font-medium">{loadError}</p>
+      )}
+
+      {loading && (
+        <div className="glass-card p-6 text-brand-muted font-medium">Loading scholarships from backend...</div>
+      )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map(s => <ScholarshipCard key={s.id} scholarship={s} onViewDetails={setSelected} />)}
-      </div>
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map(s => <ScholarshipCard key={s.id} scholarship={s} onViewDetails={setSelected} />)}
+        </div>
+      )}
 
-      {filtered.length === 0 && (
+      {!loading && filtered.length === 0 && (
         <p className="text-center text-brand-muted py-16">No scholarships match your filters. Try broadening your criteria.</p>
       )}
 

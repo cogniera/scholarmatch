@@ -50,9 +50,9 @@ export default function ResumeUploader() {
           setSaving(true);
           setSaveError(null);
           try {
-            const token = state.authToken;
-            if (token) {
-              await saveUploadUrls(token, { resume_url: secure_url });
+            const userId = state.profile?.id;
+            if (userId) {
+              await saveUploadUrls(userId, { resume_url: secure_url }, state.authToken);
             }
           } catch (err) {
             console.error('Failed to save resume URL to backend:', err);

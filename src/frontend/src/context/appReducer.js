@@ -6,6 +6,8 @@ export const initialState = {
   isAuthenticated: false,
   authToken: null,           // Auth0 access token — needed for backend API calls
   profile: null,
+  chatOrganize: null,         // { sortBy, order, filterMinAmount, filterMinMatch } from chatbot
+  scholarshipsForChat: [],     // Current scholarships for chat context (set by dashboard/scholarships pages)
   resumeUrl: null,
   resumePublicId: null,
   transcriptUrl: null,       // Added to match backend schema
@@ -111,6 +113,12 @@ export function appReducer(state, action) {
           step.id === action.payload.id ? { ...step, ...action.payload } : step
         ),
       };
+
+    // ── Chatbot ─────────────────────────────────────────────────────────────────
+    case 'SET_CHAT_ORGANIZE':
+      return { ...state, chatOrganize: action.payload };
+    case 'SET_SCHOLARSHIPS_FOR_CHAT':
+      return { ...state, scholarshipsForChat: action.payload };
 
     default:
       return state;
