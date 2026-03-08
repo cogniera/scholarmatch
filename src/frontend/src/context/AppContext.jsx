@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useReducer } from 'react';
 import { appReducer, initialState } from './appReducer';
+import { fetchMatches, fetchScholarships } from '../services/api';
 
 const AppContext = createContext(null);
 

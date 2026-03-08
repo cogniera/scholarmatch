@@ -1,3 +1,5 @@
+<img width="730" height="178" alt="image" src="https://github.com/user-attachments/assets/5a8ea363-5bf3-4ed3-bd74-631c5c46edb6" />
+
 # 📚 ScholarMatch
 
 **ScholarMatch** is an AI-powered scholarship discovery platform that matches students to scholarships they're most likely to win — using resume parsing, smart profiling, and Gemini-powered personalization.
@@ -111,6 +113,141 @@ uvicorn app.main:app --reload
 cd src/frontend
 npm install
 ```
+
+Create `src/frontend/.env`:
+
+```dotenv
+VITE_CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
+VITE_API_URL=http://localhost:8000
+VITE_AUTH0_DOMAIN=your-auth0-domain
+VITE_AUTH0_CLIENT_ID=your-auth0-client-id
+VITE_AUTH0_AUDIENCE=https://scholarmatch-api
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+# Runs at http://localhost:5173
+```
+
+---
+
+### 4. Supabase schema
+
+Run the following in your **Supabase SQL Editor** to create the required tables:
+
+```sql
+CREATE TABLE public.users (
+  id uuid NOT NULL,
+  name text,
+  email text,
+  gpa double precision,
+  program text,
+  location text,
+  academic_level text,
+  financial_need boolean,
+  extracurriculars text,
+  resume_url text,
+  transcript_url text,
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.scholarships (
+  id integer NOT NULL DEFAULT nextval('scholarships_id_seq'::regclass),
+  title text,
+  provider text,
+  amount integer,
+  deadline date,
+  eligibility text,
+  location text,
+  program text,
+  gpa_requirement double precision,
+  financial_need_required boolean DEFAULT false,
+  academic_level text,
+  link text,
+  CONSTRAINT scholarships_pkey PRIMARY KEY (id),
+  CONSTRAINT scholarships_title_provider_unique UNIQUE (title, provider)
+);
+
+CREATE TABLE public.matches (
+  user_id uuid,
+  scholarship_id integer,
+  match_score double precision,
+  ai_explanation text
+);
+```
+
+---
+
+### 5. Scraper (optional)
+
+To populate the scholarships table with real scraped data:
+
+```bash
+cd src/scraper
+pip install -r requirements.txt
+```
+
+Create `src/scraper/.env`:
+
+```dotenv
+GEMINI_API_KEY=your-gemini-api-key
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-anon-key
+```
+
+Run the scraper:
+
+```bash
+python scraper.py          # Scrapes scholarship pages
+python save_to_supabase.py # Saves results to Supabase
+```
+
+---
+
+### 6. Auth0 configuration
+
+In your Auth0 dashboard:
+
+- **Allowed Callback URLs:** `http://localhost:5173`
+- **Allowed Logout URLs:** `http://localhost:5173`
+- **Allowed Web Origins:** `http://localhost:5173`
+- Create an API with identifier `https://scholarmatch-api`
+- Authorize your application to use that API
+
+---
+
+## 📁 Project Structure
+
+```
+scholarmatch/
+├── src/
+│   ├── backend/          # FastAPI backend
+│   │   └── app/
+│   │       ├── api/routes/   # profile, scholarships, uploads
+│   │       ├── core/         # Auth0 JWT verification
+│   │       ├── database/     # Supabase client
+│   │       ├── models/       # Pydantic schemas
+│   │       └── services/     # Gemini AI, matching engine
+│   ├── frontend/         # React frontend
+│   │   └── src/
+│   │       ├── components/   # UI components
+│   │       ├── context/      # App state (reducer)
+│   │       ├── pages/        # Route pages
+│   │       └── services/     # API calls
+│   └── scraper/          # Scholarship web scraper
+└── docker-compose.yml
+```
+
+---
+
+## 📄 License
+
+MIT
+
+## 🖼️ Demo / Screenshot
 
 Create `src/frontend/.env`:
 

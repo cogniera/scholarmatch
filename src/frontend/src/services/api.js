@@ -5,6 +5,8 @@
  * Uses either bearer token auth (legacy) or X-User-Id (no-auth mode).
  */
 
+import { transformScholarshipList, transformMatchedScholarships } from './scholarshipTransformer';
+
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function parseChecksHeader(headerValue) {
@@ -168,6 +170,7 @@ export async function fetchProfile(userId, token = null) {
 /**
  * Fetch matched scholarships for the current user.
  * Set explain=true to include AI explanations (slower).
+ * Returns frontend-shaped scholarship objects with match scores.
  *
  * @param {string} userId - Profile id persisted in local storage
  * @param {boolean} explain - include Gemini AI explanations
@@ -178,7 +181,8 @@ export async function fetchMatches(userId, explain = false, token = null) {
   });
 
   if (!res.ok) throw new Error('Failed to fetch matches');
-  return res.json();
+  const matchResponse = await res.json();
+  return transformMatchedScholarships(matchResponse);
 }
 
 /**
