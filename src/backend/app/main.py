@@ -27,6 +27,7 @@ from app.api.routes.scholarships import router as scholarships_router
 from app.api.routes.uploads import router as uploads_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.roadmap import router as roadmap_router
+from app.api.routes.automation import router as automation_router
 from app.database.database import get_supabase
 from app.utills.config import settings
 
@@ -55,10 +56,9 @@ async def startup_event():
         print("Please check your SUPABASE_URL and SUPABASE_KEY in .env file")
 
 # ── CORS ───────────────────────────────────────────────────────────────────────
-# Update origins to your deployed frontend URL before going to production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:3000"],
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,6 +71,7 @@ app.include_router(scholarships_router)
 app.include_router(uploads_router)
 app.include_router(dashboard_router)
 app.include_router(roadmap_router)
+app.include_router(automation_router)
 
 
 # ── Health Check ───────────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "app.main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         reload=True,
         log_level="info",
