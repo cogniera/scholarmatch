@@ -1,3 +1,4 @@
+<img width="730" height="178" alt="image" src="https://github.com/user-attachments/assets/5a8ea363-5bf3-4ed3-bd74-631c5c46edb6" />
 
 # 📚 Scholarmatch
 
