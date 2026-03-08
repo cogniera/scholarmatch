@@ -5,6 +5,8 @@
  * The Auth0 token is passed in so protected routes work.
  */
 
+import { transformScholarshipList, transformMatchedScholarships } from './scholarshipTransformer';
+
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
@@ -73,8 +75,29 @@ export async function createProfile(token, profileData) {
 }
 
 /**
+ * Fetch all scholarships from the public endpoint (no auth needed).
+ * Returns frontend-shaped scholarship objects.
+ *
+ * @param {object} [filters] - Optional filters { location, program, limit }
+ */
+export async function fetchScholarships(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.location) params.set('location', filters.location);
+  if (filters.program) params.set('program', filters.program);
+  if (filters.limit) params.set('limit', String(filters.limit));
+
+  const qs = params.toString();
+  const res = await fetch(`${BASE_URL}/scholarships${qs ? '?' + qs : ''}`);
+
+  if (!res.ok) throw new Error('Failed to fetch scholarships');
+  const rawList = await res.json();
+  return transformScholarshipList(rawList);
+}
+
+/**
  * Fetch matched scholarships for the current user.
  * Set explain=true to include AI explanations (slower).
+ * Returns frontend-shaped scholarship objects with match scores.
  *
  * @param {string} token - Auth0 access token
  * @param {boolean} explain - include Gemini AI explanations
@@ -85,7 +108,8 @@ export async function fetchMatches(token, explain = false) {
   });
 
   if (!res.ok) throw new Error('Failed to fetch matches');
-  return res.json();
+  const matchResponse = await res.json();
+  return transformMatchedScholarships(matchResponse);
 }
 
 /**
