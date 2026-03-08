@@ -2,6 +2,8 @@
 routers/scholarships.py — Scholarship browsing + matching endpoints
 """
 
+import json
+import os
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.auth import get_user_id
 from app.database.database import get_supabase

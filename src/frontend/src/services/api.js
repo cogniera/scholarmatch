@@ -33,26 +33,10 @@ export async function saveUploadUrls(token, urls) {
 }
 
 /**
- * Fetch the current user's profile from the backend.
- * Used to rehydrate state after page refresh.
+ * Create a new user profile on the backend.
  *
  * @param {string} token - Auth0 access token
- */
-export async function fetchProfile(token) {
-  const res = await fetch(`${BASE_URL}/profile`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (res.status === 404) return null; // Profile doesn't exist yet
-  if (!res.ok) throw new Error('Failed to fetch profile');
-  return res.json();
-}
-
-/**
- * Create a new student profile.
- *
- * @param {string} token - Auth0 access token
- * @param {object} profileData
+ * @param {object} profileData - Profile data to create
  */
 export async function createProfile(token, profileData) {
   const res = await fetch(`${BASE_URL}/profile`, {
@@ -67,6 +51,30 @@ export async function createProfile(token, profileData) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Failed to create profile');
+  }
+
+  return res.json();
+}
+
+/**
+ * Update the current user's profile on the backend.
+ *
+ * @param {string} token - Auth0 access token
+ * @param {object} profileData - Profile data to update
+ */
+export async function updateProfile(token, profileData) {
+  const res = await fetch(`${BASE_URL}/profile`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update profile');
   }
 
   return res.json();

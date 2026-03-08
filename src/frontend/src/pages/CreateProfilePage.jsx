@@ -4,12 +4,13 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useApp } from '../context/AppContext';
 import ResumeUploader from '../components/profile/ResumeUploader';
 import ManualProfileForm from '../components/profile/ManualProfileForm';
+import { createProfile } from '../services/api';
 import { FileText, PenLine, ArrowRight, Zap } from 'lucide-react';
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const { dispatch } = useApp();
-  const { user } = useAuth0();
+  const { user, getAccessTokenSilently } = useAuth0();
   const [tab, setTab] = useState('resume');
 
   const saveAndNavigate = (formData) => {
@@ -21,8 +22,30 @@ export default function CreateProfilePage() {
     navigate('/dashboard/home');
   };
 
-  const handleManualSubmit = (formData) => {
-    saveAndNavigate(formData);
+  const handleManualSubmit = async (formData) => {
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: import.meta.env.VITE_AUTH0_AUDIENCE },
+      });
+      // Map form fields to backend schema
+      const backendData = {
+        name: formData.name,
+        email: user?.email || '',
+        gpa: formData.gpa,
+        program: formData.program,
+        location: formData.location || formData.university, // fallback
+        academic_level: formData.year, // map year to academic_level
+        financial_need: false, // default
+        extracurriculars: '', // default
+      };
+      const createdProfile = await createProfile(token, backendData);
+      dispatch({ type: 'SET_PROFILE_FROM_BACKEND', payload: createdProfile });
+      navigate('/dashboard/home');
+    } catch (error) {
+      console.error('Failed to create profile on backend:', error);
+      // Fallback to local save
+      saveAndNavigate(formData);
+    }
   };
 
   const handleDemoProfile = () => {

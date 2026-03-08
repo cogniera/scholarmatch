@@ -49,6 +49,7 @@ export default function ProfilePage() {
                 { icon: MapPin, label: 'Location', value: profile.location || 'N/A' },
                 { icon: GraduationCap, label: 'University', value: profile.university || 'N/A' },
                 { icon: BookOpen, label: 'Program', value: profile.program || 'N/A' },
+                { icon: Briefcase, label: 'Qualities', value: profile.qualities?.join(', ') || 'N/A' },
                 { icon: Briefcase, label: 'Career Interests', value: profile.careerInterests?.join(', ') || 'N/A' },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3">
