@@ -27,6 +27,7 @@ from app.api.routes.scholarships import router as scholarships_router
 from app.api.routes.uploads import router as uploads_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.roadmap import router as roadmap_router
+from app.api.routes.automation import router as automation_router
 from app.database.database import get_supabase
 from app.utills.config import settings
 
@@ -71,6 +72,7 @@ app.include_router(scholarships_router)
 app.include_router(uploads_router)
 app.include_router(dashboard_router)
 app.include_router(roadmap_router)
+app.include_router(automation_router)
 
 
 # ── Health Check ───────────────────────────────────────────────────────────────

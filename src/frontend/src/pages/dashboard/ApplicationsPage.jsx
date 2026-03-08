@@ -6,6 +6,7 @@ import { fetchMatches } from '../../services/api';
 
 const tabs = ['All', 'Saved', 'Applied', 'Submitted'];
 const LOCAL_USER_ID_KEY = 'scholarmatch_user_id';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const statusVariants = {
   saved: { variant: 'muted', label: 'Saved', icon: Bookmark },
@@ -20,6 +21,7 @@ export default function ApplicationsPage() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [isFilling, setIsFilling] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -93,6 +95,21 @@ export default function ApplicationsPage() {
   const formatAmount = (amount) => (Number.isFinite(amount) ? `$${amount.toLocaleString()}` : '!');
   const formatDeadline = (deadline) => (deadline ? new Date(deadline).toLocaleDateString() : '!');
 
+  const handleFillWithAI = async () => {
+    if (isFilling) return;
+    setIsFilling(true);
+    try {
+      await fetch(`${API_BASE_URL}/automation/rbc-ignite`, {
+        method: 'POST',
+      });
+      // Optional: you could add a toast/notification here.
+    } catch (err) {
+      console.error('Failed to trigger automation', err);
+    } finally {
+      setIsFilling(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in max-w-5xl space-y-6">
       <div>
@@ -101,11 +118,23 @@ export default function ApplicationsPage() {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-6">
+      <div className="flex items-center gap-6">
         {Object.entries(counts).map(([label, count]) => (
-          <div key={label}>
-            <span className="text-2xl font-display font-bold text-brand-text">{loading ? 'Loading...' : count}</span>
-            <span className="text-sm text-brand-muted ml-2">{label}</span>
+          <div key={label} className="flex items-center gap-2">
+            <span className="text-2xl font-display font-bold text-brand-text">
+              {loading ? 'Loading...' : count}
+            </span>
+            <span className="text-sm text-brand-muted">{label}</span>
+            {label === 'Submitted' && (
+              <button
+                type="button"
+                onClick={handleFillWithAI}
+                className="btn-primary text-xs py-1 px-3"
+                disabled={isFilling}
+              >
+                {isFilling ? 'Filling…' : 'Fill with AI'}
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -140,7 +169,10 @@ export default function ApplicationsPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="font-display font-bold text-brand-text text-base truncate">{app.name || '—'}</h3>
-                  <Badge variant={config.variant}><StatusIcon size={12} className="mr-1" />{config.label}</Badge>
+                  <Badge variant={config.variant}>
+                    <StatusIcon size={12} className="mr-1" />
+                    {config.label}
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-brand-muted">
                   <span className="font-medium text-brand-accent">{formatAmount(app.amount)}</span>
@@ -150,14 +182,16 @@ export default function ApplicationsPage() {
                   <div className="mt-2 max-w-xs"><ProgressBar value={app.progress} /></div>
                 )}
               </div>
-              <a
-                href={viewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-ghost text-sm flex-shrink-0"
-              >
-                {app.status === 'saved' ? 'Start' : 'View'} <ArrowRight size={14} />
-              </a>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <a
+                  href={viewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-ghost text-sm"
+                >
+                  {app.status === 'saved' ? 'Start' : 'View'} <ArrowRight size={14} />
+                </a>
+              </div>
             </div>
           );
         })}
