@@ -7,6 +7,17 @@
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+function parseChecksHeader(headerValue) {
+  if (!headerValue) return [];
+
+  try {
+    const parsed = JSON.parse(headerValue);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Save Cloudinary URLs to the backend (Supabase).
  * Called after a successful Cloudinary upload.
@@ -48,12 +59,23 @@ export async function createProfile(token, profileData) {
     body: JSON.stringify(profileData),
   });
 
+  const backendChecks = parseChecksHeader(res.headers.get('x-profile-checks'));
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || 'Failed to create profile');
+    const detail = err?.detail;
+    const message = typeof detail === 'string'
+      ? detail
+      : detail?.message || 'Failed to create profile';
+
+    const apiError = new Error(message);
+    apiError.status = res.status;
+    apiError.checks = Array.isArray(detail?.checks) ? detail.checks : backendChecks;
+    throw apiError;
   }
 
-  return res.json();
+  const profile = await res.json();
+  return { profile, checks: backendChecks };
 }
 
 /**

@@ -7,8 +7,42 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  const { isAuthenticated, user } = useAuth0();
+  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncAuthToken = async () => {
+      if (!isAuthenticated) {
+        dispatch({ type: 'LOGOUT' });
+        return;
+      }
+
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+          },
+        });
+
+        if (!cancelled && token) {
+          dispatch({ type: 'SET_AUTH_TOKEN', payload: token });
+        }
+      } catch (err) {
+        // Keep UI usable even if token refresh fails; per-page flows can recover interactively.
+        if (!cancelled) {
+          console.error('Failed to sync Auth0 access token:', err);
+        }
+      }
+    };
+
+    syncAuthToken();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
