@@ -11,7 +11,8 @@ Run after scraper.py:
 Supabase scholarships table schema:
     id, title, provider, amount (int), deadline (date),
     eligibility (text), location, program, gpa_requirement (float),
-    financial_need_required (bool), academic_level (text), link
+    financial_need_required (bool), academic_level (text), link,
+    logo_url (text), image_url (text)
 """
 
 import os
@@ -88,6 +89,8 @@ def transform(raw: dict) -> dict:
         "financial_need_required": parse_financial_need(keywords),
         "academic_level":         parse_academic_level(raw.get("education_level", [])),
         "link":                   raw.get("application_url") or "",
+        "logo_url":               raw.get("logo_url") or "",
+        "image_url":              raw.get("image_url") or "",
     }
 
 
