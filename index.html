@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScholarMatch</title>
+<meta name="description" content="Matches students to scholarships they can win.">
+<style>
+:root { --bg: #fffdf8; --panel: #ffffff; --line: #e8dfce; --fg: #16192b; --mute: #5b6072; --accent: #f5a524; --deep: #9a5b00; --good: #16804f; }
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 17px/1.65 system-ui, 'Segoe UI', sans-serif; }
+a { color: inherit; }
+main, header, footer { width: min(960px, 100% - 40px); margin-inline: auto; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 26px 0; font-weight: 700; }
+header b { color: var(--deep); }
+h1 { font-size: clamp(38px, 6.4vw, 66px); line-height: 1.06; letter-spacing: -0.025em; max-width: 15ch; margin-top: clamp(30px, 8vh, 84px); text-wrap: balance; }
+h1 em { font-style: normal; color: var(--deep); }
+.lead { color: var(--mute); font-size: clamp(18px, 2vw, 21px); max-width: 56ch; margin-top: 20px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn { display: inline-block; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 650; border: 1px solid var(--line); }
+.btn.main { background: var(--accent); border-color: transparent; }
+.btn:hover { filter: brightness(1.06); }
+h2 { font-size: clamp(26px, 3.2vw, 34px); letter-spacing: -0.015em; margin-top: clamp(64px, 11vh, 110px); }
+h2 + p { color: var(--mute); max-width: 62ch; margin-top: 8px; }
+.demo { display: grid; grid-template-columns: 270px 1fr; gap: clamp(22px, 4vw, 48px); margin-top: 26px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 3vw, 30px); }
+label { display: block; font-weight: 600; margin-bottom: 16px; }
+label output { float: right; color: var(--deep); }
+input[type='range'] { width: 100%; accent-color: var(--accent); margin-top: 8px; }
+select { width: 100%; font: inherit; padding: 9px 10px; margin-top: 6px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: inherit; }
+.check { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--deep); outline-offset: 3px; }
+#list { list-style: none; padding: 0; }
+#list li { padding: 13px 0; border-bottom: 1px solid var(--line); }
+#list li:last-child { border: 0; }
+.top { display: flex; justify-content: space-between; gap: 14px; font-weight: 650; }
+.top span:last-child { font-variant-numeric: tabular-nums; color: var(--good); white-space: nowrap; }
+.bar { height: 7px; border-radius: 9px; background: #f1e9d9; margin-top: 8px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 9px; transition: width 250ms; }
+.why { color: var(--mute); font-size: 14.5px; margin-top: 5px; }
+li.out { opacity: 0.62; }
+li.out .top span:last-child { color: var(--mute); font-weight: 500; }
+dl { display: grid; grid-template-columns: 190px 1fr; margin-top: 22px; border-top: 1px solid var(--line); }
+dt, dd { padding: 14px 0; border-bottom: 1px solid var(--line); }
+dt { font-weight: 650; }
+dd { color: var(--mute); margin: 0; }
+footer { color: var(--mute); font-size: 15px; padding: 80px 0 46px; }
+@media (max-width: 760px) { .demo, dl { grid-template-columns: 1fr; } dt { border: 0; padding-bottom: 0; } dd { padding-top: 2px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header><span>Scholar<b>Match</b></span><a href="https://github.com/cogniera/scholarmatch">GitHub</a></header>
+<main>
+  <h1>Don't find scholarships. <em>Let scholarships find you.</em></h1>
+  <p class="lead">Upload a resume or fill out a quick profile. ScholarMatch scores every scholarship against it, shows the ones that fit, and tracks your applications.</p>
+  <div class="row"><a class="btn main" href="https://github.com/cogniera/scholarmatch">View the code</a><a class="btn" href="https://devpost.com/software/scholarmatch-wov9gc">Devpost</a></div>
+
+  <h2>Try the matching</h2>
+  <p>Change the profile and the ranking changes. The scholarships are made up and the scoring is simplified, but the weights are the engine's own.</p>
+  <div class="demo">
+    <form id="form" onsubmit="return false">
+      <label>GPA <output id="gpaOut"></output><input id="gpa" type="range" min="2" max="4" step="0.1" value="3.6"></label>
+      <label>Program<select id="program"><option>Engineering</option><option>Business</option><option>Health</option><option>Arts</option></select></label>
+      <label>Location<select id="location"><option>Ontario</option><option>British Columbia</option><option>Alberta</option></select></label>
+      <label class="check"><input id="need" type="checkbox"> Financial need</label>
+    </form>
+    <ol id="list" aria-live="polite"></ol>
+  </div>
+
+  <h2>How it matches</h2>
+  <dl>
+    <dt>Filter</dt><dd>Scholarships you aren't eligible for are removed, with the reason: GPA, academic level, location, program or need.</dd>
+    <dt>Score</dt><dd>GPA counts for 40%, financial need 25%, program 20%, location 10% and deadline 5%.</dd>
+    <dt>Understand</dt><dd>Embeddings compare your qualities with what each scholarship looks for. The final score is 60% points and 40% this fit.</dd>
+    <dt>Advise</dt><dd>Gemini reads your resume, answers questions about essays and eligibility, and builds a roadmap of what to improve.</dd>
+    <dt>Track</dt><dd>A dashboard keeps your deadlines and application statuses in one place.</dd>
+  </dl>
+
+  <h2>Built with</h2>
+  <p>React, Tailwind, FastAPI, Supabase, Auth0, Google Gemini, Cloudinary and Docker. Setup steps are in the <a href="https://github.com/cogniera/scholarmatch#readme">README</a>.</p>
+</main>
+<footer>By <a href="https://github.com/cogniera">cogniera</a>, <a href="https://github.com/vkreji">vkreji</a>, <a href="https://github.com/Aad1t">Aad1t</a> and <a href="https://github.com/JosiahLam">JosiahLam</a>.</footer>
+<script>
+const all = [
+  { name: 'Northern Engineering Award', gpa: 3.5, program: 'Engineering', days: 40 },
+  { name: 'Ontario Access Grant', gpa: 2.5, location: 'Ontario', need: true, days: 20 },
+  { name: 'Future Leaders in Business', gpa: 3.2, program: 'Business', days: 75 },
+  { name: 'Community Health Bursary', gpa: 2.8, program: 'Health', need: true, days: 55 },
+  { name: 'Pacific Creators Prize', gpa: 2.6, program: 'Arts', location: 'British Columbia', days: 30 },
+  { name: 'Open Merit Scholarship', gpa: 3.0, days: 60 },
+];
+const $ = id => document.getElementById(id);
+function score(s, u) {
+  if (u.gpa < s.gpa) return { out: `needs a GPA of ${s.gpa.toFixed(1)}` };
+  if (s.need && !u.need) return { out: 'requires financial need' };
+  if (s.program && s.program !== u.program) return { out: `for ${s.program} students` };
+  if (s.location && s.location !== u.location) return { out: `for ${s.location}` };
+  const gpa = Math.min(1, 0.7 + (u.gpa - s.gpa) * 0.3), need = s.need ? 1 : 0.6, program = s.program ? 1 : 0.6, place = s.location ? 1 : 0.6, due = Math.min(1, s.days / 60);
+  return { n: gpa * 0.4 + need * 0.25 + program * 0.2 + place * 0.1 + due * 0.05, why: [`GPA of ${s.gpa.toFixed(1)} or more`, s.program && 'your program', s.location && 'your location', s.need && 'your need'].filter(Boolean).join(', ') };
+}
+function draw() {
+  const u = { gpa: +$('gpa').value, program: $('program').value, location: $('location').value, need: $('need').checked };
+  $('gpaOut').textContent = u.gpa.toFixed(1);
+  $('list').replaceChildren(...all.map(s => ({ s, r: score(s, u) })).sort((a, b) => (b.r.n ?? -1) - (a.r.n ?? -1)).map(({ s, r }) => {
+    const li = document.createElement('li'), pct = r.n ? Math.round(r.n * 100) : 0;
+    li.className = r.out ? 'out' : '';
+    li.innerHTML = `<div class="top"><span>${s.name}</span><span>${r.out ? 'not eligible' : pct + '% match'}</span></div>${r.out ? '' : `<div class="bar"><i style="width:${pct}%"></i></div>`}<div class="why">${r.out || r.why}</div>`;
+    return li;
+  }));
+}
+$('form').addEventListener('input', draw);
+draw();
+</script>
+</body>
+</html>
