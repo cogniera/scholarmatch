@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScholarMatch</title>
-<meta name="description" content="Matches students to scholarships they can win.">
+<meta name="description" content="A hackathon demo that matches students to scholarships. Not a real service or financial advice.">
 <style>
 :root { --bg: #fffdf8; --panel: #ffffff; --line: #e8dfce; --fg: #16192b; --mute: #5b6072; --accent: #f5a524; --deep: #9a5b00; --good: #16804f; }
 * { box-sizing: border-box; margin: 0; }
 body { background: var(--bg); color: var(--fg); font: 17px/1.65 system-ui, 'Segoe UI', sans-serif; }
 a { color: inherit; }
 main, header, footer { width: min(960px, 100% - 40px); margin-inline: auto; }
+.notice { background: #fdeccb; border-bottom: 1px solid #efcf8f; color: #3d2600; padding: 12px 20px; text-align: center; font-size: 16px; line-height: 1.5; }
 header { display: flex; justify-content: space-between; align-items: center; padding: 26px 0; font-weight: 700; }
 header b { color: var(--deep); }
 h1 { font-size: clamp(38px, 6.4vw, 66px); line-height: 1.06; letter-spacing: -0.025em; max-width: 15ch; margin-top: clamp(30px, 8vh, 84px); text-wrap: balance; }
@@ -50,6 +51,7 @@ footer { color: var(--mute); font-size: 15px; padding: 80px 0 46px; }
 </style>
 </head>
 <body>
+<p class="notice" role="note"><strong>This is a hackathon project, not a real service.</strong> The scholarships, matches and scores shown here are not real, and nothing on this page is financial advice. Check with your school or the scholarship provider before making any decision.</p>
 <header><span>Scholar<b>Match</b></span><a href="https://github.com/cogniera/scholarmatch">GitHub</a></header>
 <main>
   <h1>Don't find scholarships. <em>Let scholarships find you.</em></h1>
@@ -80,7 +82,7 @@ footer { color: var(--mute); font-size: 15px; padding: 80px 0 46px; }
   <h2>Built with</h2>
   <p>React, Tailwind, FastAPI, Supabase, Auth0, Google Gemini, Cloudinary and Docker. Setup steps are in the <a href="https://github.com/cogniera/scholarmatch#readme">README</a>.</p>
 </main>
-<footer>By <a href="https://github.com/cogniera">cogniera</a>, <a href="https://github.com/vkreji">vkreji</a>, <a href="https://github.com/Aad1t">Aad1t</a> and <a href="https://github.com/JosiahLam">JosiahLam</a>.</footer>
+<footer>A hackathon project for demonstration only. Not a real scholarship service and not financial advice.<br>By <a href="https://github.com/cogniera">cogniera</a>, <a href="https://github.com/vkreji">vkreji</a>, <a href="https://github.com/Aad1t">Aad1t</a> and <a href="https://github.com/JosiahLam">JosiahLam</a>.</footer>
 <script>
 const all = [
   { name: 'Northern Engineering Award', gpa: 3.5, program: 'Engineering', days: 40 },
